@@ -9,7 +9,7 @@ export default function _layout() {
     <Stack.Screen name="menu" />
     <Stack.Screen name="alphabet" />
    <Stack.Screen name="numbers"/>
-    <Stack.Screen name="myscreen"/>
+    <Stack.Screen name="animal"/>
     <Stack.Screen name="screen_ia"/>
 
     </Stack>    
