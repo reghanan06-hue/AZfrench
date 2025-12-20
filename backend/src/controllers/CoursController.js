@@ -37,20 +37,20 @@ export const getAllCours = async (req, res) => {
 };
 
 
-// export const getCoursById = async (req, res) => {
-//   try {
-//     const { id } = req.params;
+export const getCoursById = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-//     const artist = await Artist.findByPk(id,{
-//       include:us
-//     });
+    const cours = await Cours.findByPk(id,{
+      include:us
+    });
 
-//     if (!artist) {
-//       return res.status(404).json({ message: "Artist not found" });
-//     }
+    if (!cours) {
+      return res.status(404).json({ message: "Cours not found" });
+    }
 
-//     res.json(artist);
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
+    res.json(cours);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};

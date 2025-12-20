@@ -12,7 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/auth", authRouters);
-app.use("/course", CoursRouters);
+app.use("/cours", CoursRouters);
 app.use("/lesson",LessonRouters);
 const PORT = process.env.PORT || 4000;
 

@@ -1,40 +1,41 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/database.js";
-import Cours from "./Cours.js";
+import Cours from "./Cours.js";  // importer le model Cours
 
-const Lecon = sequelize.define('Lecon', {
-      id: { 
-    type: DataTypes.INTEGER, 
-    primaryKey: true,
-    autoIncrement: true 
-  },
-   cours_id: {                    
-    type: DataTypes.INTEGER,
-    allowNull: false,           
-    references: {               
-      model: Cours,
-      key: "id",
+const Lesson = sequelize.define(
+  "Lesson",
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
     },
-    onDelete: "CASCADE",       
-  },
+    cours_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "cours", // nom exact de la table Cours
+        key: "id",
+      },
+      onDelete: "CASCADE",
+    },
     name_lesson: {
-        type: DataTypes.STRING,
-        allowNull: false
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     date_lecon: {
-        type: DataTypes.DATE,
-        allowNull: false
-    }
-}, {
-  tableName: "lecon",
-  timestamps: true,           // createdAt + updatedAt automatiques
-  createdAt: "created_at",
-  updatedAt: "updated_at"
-}
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+  },
+  {
+    tableName: "lecon", // nom de la table
+    timestamps: false, // createdAt + updatedAt
+  }
 );
 
-// Relation : Un Cours peut avoir plusieurs Leçons
-Cours.hasMany(Lecon, { foreignKey: 'id_cours' });
-Lecon.belongsTo(Cours, { foreignKey: 'id_cours' });
+// Associations
+Cours.hasMany(Lesson, { foreignKey: "cours_id", onDelete: "CASCADE" });
+Lesson.belongsTo(Cours, { foreignKey: "cours_id", onDelete: "CASCADE" });
 
-export default Lecon;
+export default Lesson;

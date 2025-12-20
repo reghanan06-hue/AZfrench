@@ -44,23 +44,36 @@ export default function alphabet() {
     });
   };
 
-  const repeatSound = () => {
-    Speech.stop(); // arrêter le son en cours
-    Speech.speak("A", {
-      language: "fr-FR",
-      rate: 0.8,
-      pitch: 1,
-    });
-  };
-  // function reapter
-  //   const repeatSound = () => {
+  // const repeatSound = () => {
   //   Speech.stop(); // arrêter le son en cours
-  //   Speech.speak(currentLetter, {
+  //   Speech.speak("A", {
   //     language: "fr-FR",
   //     rate: 0.8,
   //     pitch: 1,
   //   });
   // };
+  // function reapter
+
+  const repeatSound = () => {
+    Speech.stop(); // arrêter le son en cours
+
+    let count = 0;
+    const maxRepeat = 5;
+
+    const speakAgain = () => {
+      if (count < maxRepeat) {
+        count++;
+        Speech.speak("A", {
+          language: "fr-FR",
+          rate: 0.8,
+          pitch: 1,
+          onDone: speakAgain, // répéter après la fin
+        });
+      }
+    };
+
+    speakAgain();
+  };
 
   useEffect(() => {
     Animated.parallel([
@@ -152,5 +165,6 @@ const styles = StyleSheet.create({
     margin: 19,
     justifyContent: "space-between",
     backgroundColor: "#6DC8F5",
+    borderRadius: 15,
   },
 });

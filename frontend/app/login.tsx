@@ -1,21 +1,25 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from 'expo-router';
+import { useRouter } from "expo-router";
 
 import React, { useState } from "react";
-import { ImageBackground, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  ImageBackground,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function login() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   return (
     <View style={styles.container}>
-      <Text style={styles.titleLogin} > Log in </Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Username"
-      />
+      <Text style={styles.titleLogin}> Log in </Text>
+      <TextInput style={styles.input} placeholder="Username" />
       <ImageBackground
-        source={require('../assets/images/login.png')}
+        source={require("../assets/images/login.png")}
         //../assets/images/0.png"
         style={styles.backgroundImage}
         resizeMode="cover" // Adjust resizeMode as needed (cover, contain, stretch, repeat, center)
@@ -35,17 +39,15 @@ export default function login() {
           size={22}
           color="#4b41dfff"
         />
-        <Text style={styles.titleLogin} > </Text>
-
-      </TouchableOpacity >
-
-      <TouchableOpacity style={styles.bttnLogin}
-        onPress={() => router.push("/menu")} >
-
-
-        <Text style={styles.textBtn}> log in</Text>
+        <Text style={styles.titleLogin}> </Text>
       </TouchableOpacity>
 
+      <TouchableOpacity
+        style={styles.bttnLogin}
+        onPress={() => router.push("/menu")}
+      >
+        <Text style={styles.textBtn}> log in</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -57,22 +59,19 @@ const styles = StyleSheet.create({
 
     marginVertical: 100,
     backgroundColor: "white",
-
   },
   backgroundImage: {
     flex: 1, // Ensures the image background takes up the full available space
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   titleLogin: {
     fontSize: 40,
     fontWeight: "black",
     alignSelf: "center",
-    marginVertical: 20
-
+    marginVertical: 20,
   },
   input: {
-
     borderWidth: 4,
     borderColor: "#5c81efff",
     borderRadius: 8,
@@ -98,8 +97,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     alignSelf: "center",
-    marginVertical: 10
-
-  }
-
+    marginVertical: 10,
+  },
 });

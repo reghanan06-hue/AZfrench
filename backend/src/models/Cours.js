@@ -25,7 +25,10 @@ const Cours = sequelize.define("Cours", {
   description: { 
     type: DataTypes.TEXT 
   },
-  
+  photo_url: { 
+  type: DataTypes.STRING 
+},
+
   date_creation: { 
     type: DataTypes.DATE 
   },
