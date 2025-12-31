@@ -1,52 +1,55 @@
-import { Ionicons } from "@expo/vector-icons";
+import { useRoute } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-
 import React, { useState } from "react";
 import {
-  ImageBackground,
-  StyleSheet,
+  View,
   Text,
   TextInput,
+  StyleSheet,
   TouchableOpacity,
-  View,
+  ImageBackground,
+  Dimensions,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
 } from "react-native";
 
-export default function login() {
-  const [showPassword, setShowPassword] = useState(false);
+const { width, height } = Dimensions.get("window");
+
+export default function LoginScreen() {
   const router = useRouter();
+  //code///for//acces//menu//by..login
+  const [name,setName]=useState("");
+  const [password, setPassword] = useState("");
+const handleLogin =async()=>{
+  Alert.alert("Erreur","Tous les champs sont obligatoires");
+  return;
+}
+  //code/////design////
   return (
     <View style={styles.container}>
-      <Text style={styles.titleLogin}> Log in </Text>
-      <TextInput style={styles.input} placeholder="Username" />
       <ImageBackground
         source={require("../assets/images/login.png")}
-        //../assets/images/0.png"
-        style={styles.backgroundImage}
-        resizeMode="cover" // Adjust resizeMode as needed (cover, contain, stretch, repeat, center)
-      ></ImageBackground>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        secureTextEntry={!showPassword}
-      />
-      <TouchableOpacity
-        style={styles.icon}
-        onPress={() => setShowPassword(!showPassword)}
+        style={styles.image}
+        resizeMode="contain"
       >
-        <Ionicons
-          name={showPassword ? "eye" : "eye-off"}
-          size={22}
-          color="#4b41dfff"
+        <TextInput placeholder="Email" style={[styles.input, { top: "52%" }]} />
+
+        <TextInput
+          placeholder="Mot de passe"
+          secureTextEntry
+          style={[styles.input, { top: "62%" }]}
         />
-        <Text style={styles.titleLogin}> </Text>
-      </TouchableOpacity>
+      </ImageBackground>
 
       <TouchableOpacity
-        style={styles.bttnLogin}
+        style={[styles.button, { bottom: "15%" }]}
         onPress={() => router.push("/menu")}
       >
-        <Text style={styles.textBtn}> log in</Text>
+        <Text style={styles.buttonText}>se connecter</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => router.push("/account")}>
+        <Text style={[styles.linkText, { top: "5%" }]}>créer un compte</Text>
       </TouchableOpacity>
     </View>
   );
@@ -54,49 +57,42 @@ export default function login() {
 
 const styles = StyleSheet.create({
   container: {
-    position: "relative",
-    width: "100%",
-
-    marginVertical: 100,
-    backgroundColor: "white",
-  },
-  backgroundImage: {
-    flex: 1, // Ensures the image background takes up the full available space
-    justifyContent: "center",
+    flex: 1,
+    backgroundColor: "#fff",
     alignItems: "center",
   },
-  titleLogin: {
-    fontSize: 40,
-    fontWeight: "black",
-    alignSelf: "center",
-    marginVertical: 20,
-  },
-  input: {
-    borderWidth: 4,
-    borderColor: "#5c81efff",
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 40,
-    marginBottom: 20,
-  },
-  icon: {
-    position: "absolute",
-    right: 20,
-    top: "65%",
+
+  image: {
+    width: "100%",
+    height: height * 0.7,
   },
 
-  bttnLogin: {
-    backgroundColor: "#0a8fd2ff",
-    width: "90%",
-    height: 50,
+  input: {
+    position: "absolute",
     alignSelf: "center",
-    borderRadius: 15,
+    width: "66%",
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 12,
+    fontSize: 16,
   },
-  textBtn: {
-    color: "white",
-    fontSize: 20,
-    fontWeight: "bold",
-    alignSelf: "center",
-    marginVertical: 10,
+
+  button: {
+    width: "80%",
+    backgroundColor: "#76C9F0",
+    padding: 15,
+    borderRadius: 15,
+    alignItems: "center",
+  },
+
+  buttonText: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
+
+  linkText: {
+    marginTop: 10,
+    color: "#3B4CCA",
+    fontStyle: "italic",
   },
 });

@@ -11,12 +11,9 @@ export default function _layout() {
         <Stack.Screen name="login" />
         <Stack.Screen name="account" />
         <Stack.Screen name="menu" />
-        <Stack.Screen name="alphabet" />
-        <Stack.Screen name="example" />
-
+        <Stack.Screen name="id" />
         <Stack.Screen name="numbers" />
         <Stack.Screen name="animal" />
-        <Stack.Screen name="screen_ia" />
       </Stack>
     </QueryClientProvider>
   );
