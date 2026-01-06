@@ -9,22 +9,58 @@ import {
   TouchableOpacity,
   ImageBackground,
   Dimensions,
-  KeyboardAvoidingView,
-  Platform,
   Alert,
 } from "react-native";
 
-const { width, height } = Dimensions.get("window");
+const { height } = Dimensions.get("window");
+const API_URL = "http:/192.168.11.106:5000";
 
 export default function LoginScreen() {
   const router = useRouter();
-  //code///for//acces//menu//by..login
-  const [name,setName]=useState("");
+  //code///for//acces//menu//by..log
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-const handleLogin =async()=>{
-  Alert.alert("Erreur","Tous les champs sont obligatoires");
-  return;
-}
+
+  const handleLogin = async () => {
+    if (!name || !password) {
+      Alert.alert("Erreur", "Tous les champs sont obligatoires");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/auth/signin`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, password }),
+      });
+
+      const text = await response.text();
+      console.log("Réponse brute backend:", text);
+
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        console.log("Ce n'est pas du JSON !");
+        data = null;
+      }
+      console.log(data);
+      if (response.ok && data) {
+        Alert.alert("Succès", "Connexion réussie !");
+        setName("");
+        setPassword("");
+        router.push("/menu");
+      } else {
+        Alert.alert("Erreur", data?.error || "Une erreur est survenue");
+      }
+    } catch (err) {
+      console.log("Erreur catch:", err);
+      Alert.alert(
+        "Erreur",
+        "Impossible de se connecter, vérifiez vos identifiants"
+      );
+    }
+  };
   //code/////design////
   return (
     <View style={styles.container}>
@@ -33,12 +69,19 @@ const handleLogin =async()=>{
         style={styles.image}
         resizeMode="contain"
       >
-        <TextInput placeholder="Email" style={[styles.input, { top: "52%" }]} />
+        <TextInput
+          placeholder="Nom d'utilisation"
+          style={[styles.input, { top: "52%" }]}
+          value={name}
+          onChangeText={setName}
+        />
 
         <TextInput
           placeholder="Mot de passe"
           secureTextEntry
           style={[styles.input, { top: "62%" }]}
+          value={password}
+          onChangeText={setPassword}
         />
       </ImageBackground>
 
@@ -46,7 +89,9 @@ const handleLogin =async()=>{
         style={[styles.button, { bottom: "15%" }]}
         onPress={() => router.push("/menu")}
       >
-        <Text style={styles.buttonText}>se connecter</Text>
+        <Text style={styles.buttonText} onPress={handleLogin}>
+          se connecter
+        </Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => router.push("/account")}>
         <Text style={[styles.linkText, { top: "5%" }]}>créer un compte</Text>
