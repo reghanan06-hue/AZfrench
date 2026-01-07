@@ -7,7 +7,7 @@ async function seedUsers() {
     await sequelize.authenticate();
     console.log("✅ Database connected");
 
-    await sequelize.sync(); // assure que la table existe
+    await sequelize.sync(); 
 
     const users = [
       {

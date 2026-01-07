@@ -1,13 +1,17 @@
 import Lesson from "../models/Lesson.js";
-import Cours  from "../models/Cours.js"
+import Cours from "../models/Cours.js";
 
-export const createLesson= async (req, res) => {
+export const createLesson = async (req, res) => {
   try {
-    const { id_cours, name_lesson, date_lesson } = req.body;
+    const { cours_id, name_lesson, date_lesson } = req.body;
+
+    if (!cours_id || !name_lesson || !date_lesson) {
+      return res.status(400).json({ message: "Missing fields" });
+    }
 
     const lesson = await Lesson.create({
-      id_cours,
-      name_lesson,
+      cours_id,
+      name_lesson,    
       date_lesson,
     });
 
@@ -20,23 +24,31 @@ export const createLesson= async (req, res) => {
   }
 };
 
-
+/* ================= GET ALL ================= */
 export const getAllLesson = async (req, res) => {
   try {
-    const lecon = await Cours.findAll();
-    res.json(lecon);
+    const lessons = await Lesson.findAll({
+      include: {
+        model: Cours,
+        as: "cours", // نفس alias فـ association
+      },
+    });
+
+    res.json(lessons);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-
 export const getLessonById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const lesson = await Lesson.findByPk(id,{
-      include:us
+    const lesson = await Lesson.findByPk(id, {
+      include: {
+        model: Cours,
+        as: "cours",
+      },
     });
 
     if (!lesson) {

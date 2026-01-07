@@ -3,8 +3,9 @@ import "dotenv/config";
 import express from "express";
 import { connectDB } from "./config/database.js";
 import authRouters from "./routers/authRouter.js";
-import  CoursRouters from "./routers/coursRouter.js"
-import LessonRouters from "./routers/LessonRouter.js"
+import  CoursRouters from "./routers/coursRouter.js";
+import LessonRouters from "./routers/LessonRouter.js";
+import ExerciseRouter  from "./routers/exerciseRouter.js";
 
 const app = express();
 
@@ -12,8 +13,13 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/auth", authRouters);
+// app.post('/signup', authRouters)
+// app.post('/signin', authRouters)
+
 app.use("/cours", CoursRouters);
 app.use("/lesson",LessonRouters);
+app.use("/exercise",ExerciseRouter);
+
 const PORT = process.env.PORT || 4000;
 
 

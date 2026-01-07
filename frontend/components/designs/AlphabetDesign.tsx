@@ -11,7 +11,11 @@ import {
   View,
 } from "react-native";
 import { Easing } from "react-native";
-import { useThemeStore } from "../../../_store/useThemeStore";
+import { useThemeStore } from "../../_store/useThemeStore";
+
+const { width } = Dimensions.get("window");
+const ITEM_SIZE = width * 0.85;
+const SPACING = 40;
 
 export default function AlphabetDesign({ data }: any) {
   const colors = useThemeStore((s) => s.colors);
@@ -110,6 +114,11 @@ export default function AlphabetDesign({ data }: any) {
         <FlatList
           data={data.Lessons}
           horizontal
+          style={{ flexGrow: 0, paddingHorizontal: SPACING / 2 }}
+          snapToInterval={ITEM_SIZE + SPACING}
+          scrollEventThrottle={16}
+          contentContainerStyle={{ gap: SPACING }}
+          decelerationRate={"fast"}
           pagingEnabled
           showsHorizontalScrollIndicator={false}
           keyExtractor={(item) => item.id.toString()}
@@ -127,8 +136,8 @@ export default function AlphabetDesign({ data }: any) {
             <Image
               source={
                 soundEnabled
-                  ? require("../../../assets/images/sound.png")
-                  : require("../../../assets/images/no-sound.png")
+                  ? require("../../assets/images/sound.png")
+                  : require("../../assets/images/no-sound.png")
               }
               style={styles.iconbutton}
             />
@@ -142,7 +151,7 @@ export default function AlphabetDesign({ data }: any) {
             onPress={repeatSound}
           >
             <Image
-              source={require("../../../assets/images/repeat.png")}
+              source={require("../../assets/images/repeat.png")}
               style={styles.iconbutton}
             />
           </TouchableOpacity>
@@ -167,9 +176,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   card: {
-    width: 350,
-    height: 320,
-    marginHorizontal: 10,
+    width: ITEM_SIZE,
+    height: ITEM_SIZE,
     marginVertical: 40,
     borderRadius: 18,
     justifyContent: "center",

@@ -14,7 +14,7 @@ const Lesson = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "cours", // nom exact de la table Cours
+        model: "cours", 
         key: "id",
       },
       onDelete: "CASCADE",
@@ -29,7 +29,7 @@ const Lesson = sequelize.define(
     },
   },
   {
-    tableName: "lecon", // nom de la table
+    tableName: "lecon", 
     timestamps: false, // createdAt + updatedAt
   }
 );

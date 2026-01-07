@@ -1,40 +1,57 @@
 // store/useThemeStore.ts
-import { create } from 'zustand';
+import { create } from "zustand";
 
 type ThemeState = {
-  colors: string[]; 
+  colorMap: any;
+  colors: string[];
   colorBttn: string[];
-  selectedColorIndex: number;       // index of color screen   
-  selectedBtnColorIndex: number;    // index of color button screen 
+  selectedColorIndex: number; // index of color screen
+  selectedBtnColorIndex: number; // index of color button screen
   setColor: (index: number, newColor: string) => void;
   setBtnColor: (index: number, newColor: string) => void;
-  setSelectedColorIndex: (index: number) => void;       // select color of screen
-  setSelectedBtnColorIndex: (index: number) => void;   // select color of button
+  setSelectedColorIndex: (index: number) => void; // select color of screen
+  setSelectedBtnColorIndex: (index: number) => void; // select color of button
 };
+  const Lastcolor = "Bleu marine";
 
 export const useThemeStore = create<ThemeState>((set) => ({
   // array color for screen app
   colors: [
-    '#FFFFFF',
-    '#BADFDB',
-    '#FFC4C4',
-    '#8CE4FF',
-    '#D7D7D7',
-    '#FFCF9D',
-    '#E9B3FB',
+    "#FFFFFF",
+    "#BADFDB",
+    "#FFC4C4",
+    "#8CE4FF",
+    "#D7D7D7",
+    "#FFCF9D",
+    "#E9B3FB",
   ],
 
   // array color for button of app
   colorBttn: [
-    '#6dc8f5ff',
-    '#269c90ff',
-    '#c51790ff',
-    '#0a8fd2ff',
-    '#CD2C58',
-    '#e58d2eff',
-    '#d40dd4ff',
+    "#6dc8f5ff",
+    "#269c90ff",
+    "#c51790ff",
+    "#0a8fd2ff",
+    "#CD2C58",
+    "#e58d2eff",
+    "#d40dd4ff",
   ],
+  // mapping color names to hex values
+  colorMap: {
+    Blanc: "#ffffff",
+    Bleu: "#3b82f6",
+    Jaune: "#facc15",
+    Rouge: "#dc1818",
+    Rose: "#ec4899",
+    Violet: "#bf15eeff",
+    Maron: "#5A0E24", 
+    Orange: "#f97316",
+    Grais: "#57595B",
+    Vert: "#08CB00",
+    Noir: "#000000",
+    Lastcolor: "#360185", 
 
+  },
   // default indices
   selectedColorIndex: 0,
   selectedBtnColorIndex: 0,
@@ -51,7 +68,7 @@ export const useThemeStore = create<ThemeState>((set) => ({
   setBtnColor: (index, newColor) =>
     set((state) => {
       const updated = [...state.colorBttn];
-      updated[index] = newColor;  
+      updated[index] = newColor;
       return { colorBttn: updated };
     }),
 

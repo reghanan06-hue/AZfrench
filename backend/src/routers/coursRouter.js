@@ -9,6 +9,5 @@ import {
 const router =express.Router();
 router.post("/", createCourse);        
 router.get("/", getAllCours); 
-router.get("/", getCoursById); 
-
+router.get("/:id", getCoursById); 
 export default router;

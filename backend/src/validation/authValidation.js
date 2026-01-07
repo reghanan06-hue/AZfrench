@@ -20,7 +20,7 @@ export const registerSchema = Joi.object({
 
   password: Joi.string().min(6).required(),
 
-  genre: Joi.string().required(),
+  Genre: Joi.string().required(),
 });
 
 export const loginSchema = Joi.object({

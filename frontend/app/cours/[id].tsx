@@ -3,9 +3,8 @@ import { Text } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useGetCoursById } from "@/service/course/queries";
 
-import AlphabetDesign from "../../app/components/designs/AlphabetDesign";
-import SecondCours from "../../app/components/designs/SecondCours";
-// import mycreen from "../../app/components/designs/mycre";
+import AlphabetDesign from "../../components/designs/AlphabetDesign";
+import SecondCours from "../../components/designs/SecondCours";
 export default function CoursScreen() {
   const { id } = useLocalSearchParams();
   const coursId = Number(id);
@@ -47,14 +46,14 @@ export default function CoursScreen() {
   if (titleLower.includes("animaux")) {
     return <SecondCours data={data} coursId={coursId} />;
   }
-if (titleLower.includes("couleurs")) {
-  return (
-    <>
-      <SecondCours data={data} coursId={coursId} />
-      {/* <mycreen /> */}
-    </>
-  );
-}
+  if (titleLower.includes("couleurs")) {
+    return (
+      <>
+        <SecondCours data={data} coursId={coursId} />
+        {/* <mycreen /> */}
+      </>
+    );
+  }
 
   console.log(titleLower);
   return (

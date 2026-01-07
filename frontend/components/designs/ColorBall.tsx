@@ -1,7 +1,10 @@
 import React, { useEffect, useRef } from "react";
 import { View, StyleSheet, Animated, Easing, Text } from "react-native";
-
-export default function Loader() {
+type MyScreenProps = {
+  name?: string | null;
+  mycolor?: string;
+};
+export default function ({ name, mycolor }: MyScreenProps) {
   const progress = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -29,36 +32,42 @@ export default function Loader() {
             styles.fill,
             {
               transform: [{ scaleY: scale }],
+              backgroundColor: mycolor,
             },
           ]}
         />
       </View>
-      <Text style={styles.textColor}> Rouge</Text>
+      <Text style={styles.textColor}> {name}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    justifyContent: "center",
-    alignItems: "center",
     flex: 1,
   },
+
   loader: {
-    width: 60,
-    aspectRatio: 1,
+    width: 180,
+    height: 180,
     backgroundColor: "#ccc",
+    borderRadius: 90,
     overflow: "hidden",
-    borderRadius: 60, // Cercle
+    position: "absolute",
+    bottom: 200,
+    alignSelf: "center",
   },
+
   fill: {
     flex: 1,
-    backgroundColor: "#dc1818",
     transformOrigin: "bottom",
+    // backgroundColor: "red",
   },
+
   textColor: {
-    color: "red",
+    marginTop: 10,
     fontSize: 20,
-    fontFamily: "bold",
+    fontWeight: "bold",
+    textAlign: "center",
   },
 });
