@@ -14,13 +14,7 @@ async function seed() {
         date_creation: "2025-12-12",
 
       },
-      {
-        user_id:2,
-        title:"Les nombres",
-        description :"l'apprentisage d 'alphabet français",
-        date_creation: "2025-12-12",
-
-      },
+      
      
        {
         user_id:2,

@@ -26,11 +26,11 @@ const Exercice = sequelize.define(
       allowNull: false,
     },
     niveau: {
-      type: DataTypes.ENUM("A", "B", "C"),
+      type: DataTypes.ENUM("niveau1", "niveau2", "niveau3"),
       allowNull: false,
     },
     type: {
-      type: DataTypes.ENUM("read", "write"),
+      type: DataTypes.ENUM("lecture", "ecriture", "écoute"),
       allowNull: false,
     },
   },

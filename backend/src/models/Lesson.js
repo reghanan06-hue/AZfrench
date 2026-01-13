@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/database.js";
-import Cours from "./Cours.js";  // importer le model Cours
+import Cours from "./Cours.js";  
 
 const Lesson = sequelize.define(
   "Lesson",
@@ -14,7 +14,7 @@ const Lesson = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "cours", 
+        model: Cours,
         key: "id",
       },
       onDelete: "CASCADE",
@@ -27,7 +27,10 @@ const Lesson = sequelize.define(
       type: DataTypes.DATE,
       allowNull: true,
     },
+    photo_url: {
+     type: DataTypes.STRING
   },
+},
   {
     tableName: "lecon", 
     timestamps: false, // createdAt + updatedAt

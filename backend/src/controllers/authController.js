@@ -1,24 +1,21 @@
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import User from "../models/User.js";
-import { registerSchema } from "../validation/authValidation.js";
+import { registerSchema,loginSchema } from "../validation/authValidation.js";
 dotenv.config();
+import jwt from "jsonwebtoken";
+
 
 /* ===================== REGISTER ===================== */
 export const register = async (req, res) => {
   try {
+    // validation avec Joi
     const { error } = registerSchema.validate(req.body);
     if (error) {
       return res.status(400).json({ message: error.details[0].message });
     }
 
-    const {nameUser, email, password, Genre } = req.body;
-
-    if ( !nameUser || !email || !password || !Genre) {
-      return res.status(400).json({
-        message: "Tous les champs sont obligatoires.",
-      });
-    }
+    const { nameUser, email, password, Genre, role } = req.body;
 
     // vérifier email
     const existsEmail = await User.findOne({ where: { email } });
@@ -29,18 +26,19 @@ export const register = async (req, res) => {
     // vérifier username
     const existsUsername = await User.findOne({ where: { nameUser } });
     if (existsUsername) {
-      return res.status(400).json({
-        message: "Nom d'utilisateur déjà utilisé.",
-      });
+      return res.status(400).json({ message: "Nom d'utilisateur déjà utilisé." });
     }
 
+    // hash du mot de passe
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // création utilisateur
     const user = await User.create({
       nameUser,
       email,
       password: hashedPassword,
       Genre,
+      role: role || "user", // rôle par défaut si non fourni
     });
 
     return res.status(201).json({
@@ -48,8 +46,8 @@ export const register = async (req, res) => {
       user: {
         nameUser: user.nameUser,
         email: user.email,
-        password:user.password,
         Genre: user.Genre,
+        role: user.role,
       },
     });
   } catch (err) {
@@ -61,6 +59,7 @@ export const register = async (req, res) => {
 /* ===================== LOGIN ===================== */
 export const login = async (req, res) => {
   try {
+    // validation avec Joi
     const { error } = loginSchema.validate(req.body);
     if (error) {
       return res.status(400).json({ message: error.details[0].message });
@@ -70,20 +69,17 @@ export const login = async (req, res) => {
 
     const user = await User.findOne({ where: { nameUser } });
     if (!user) {
-      return res.status(400).json({
-        message: "Nom d'utilisateur incorrect.",
-      });
+      return res.status(400).json({ message: "Nom d'utilisateur incorrect." });
     }
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      return res.status(400).json({
-        message: "Mot de passe incorrect.",
-      });
+      return res.status(400).json({ message: "Mot de passe incorrect." });
     }
 
+    // création du token JWT
     const token = jwt.sign(
-      { id: user.id },
+      { id: user.id, nameUser: user.nameUser, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
@@ -95,6 +91,7 @@ export const login = async (req, res) => {
         id: user.id,
         nameUser: user.nameUser,
         email: user.email,
+        role: user.role,
       },
     });
   } catch (err) {

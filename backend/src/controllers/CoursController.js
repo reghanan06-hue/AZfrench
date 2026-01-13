@@ -4,20 +4,16 @@ import Lesson from "../models/Lesson.js";
 
 export const createCourse = async (req, res) => {
   try {
-    const { id_user, title, descreption, date_creation } = req.body;
+    const {id, user_id, title, descreption, date_creation } = req.body;
 
     const cours = await Cours.create({
-      id_user,
+      id,
+      user_id,
       title,
       descreption,
       date_creation,
     });
-    const newCourse = await Cours.create({
-      id_user,
-      title,
-      descreption,
-      date_creation,
-    });
+  
     res.status(201).json({
       message: "Course created successfully",
       cours,
@@ -26,6 +22,35 @@ export const createCourse = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+// export const createCourse = async (req, res) => {
+//   try {
+//     const { title, descreption, date_creation,photo_url } = req.body;
+
+//     // id de l’admin depuis le token
+//     const user_id = req.user.id;
+
+//     if (!title) {
+//       return res.status(400).json({ message: "title is required" });
+//     }
+
+//     const cours = await Cours.create({
+  
+//       user_id,         
+//       title,
+//       descreption,
+//       date_creation,
+//       photo_url,
+//     });
+
+//     res.status(201).json({
+//       message: "Course created successfully",
+//       cours,
+//     });
+//     console.log(error.message);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
 
 export const getAllCours = async (req, res) => {
   try {

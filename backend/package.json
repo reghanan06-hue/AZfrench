@@ -9,8 +9,6 @@
     "start": "node --watch src/app.js",
     "seed:cours": "node src/seeders/course.js",
     "seed:Lecon": "node src/seeders/Lecon.js"
-
-
   },
   "keywords": [],
   "author": "",
@@ -21,6 +19,9 @@
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "joi": "^18.0.2",
-    "sequelize": "^6.37.7"
+    "jsonwebtoken": "^9.0.3",
+    "sequelize": "^6.37.7",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
   }
 }
