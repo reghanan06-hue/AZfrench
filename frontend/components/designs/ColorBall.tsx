@@ -51,17 +51,18 @@ const styles = StyleSheet.create({
     width: 180,
     height: 180,
     backgroundColor: "#ccc",
-    borderRadius: 90,
+    borderRadius: "50%",
     overflow: "hidden",
     position: "absolute",
-    bottom: 200,
+    bottom: 57,
     alignSelf: "center",
+    borderWidth: 1, // ✅ border solid
+    borderColor: "#000000",
   },
 
   fill: {
     flex: 1,
     transformOrigin: "bottom",
-    // backgroundColor: "red",
   },
 
   textColor: {

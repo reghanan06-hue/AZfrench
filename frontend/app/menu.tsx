@@ -45,7 +45,7 @@ export default function Menu() {
         styles.cardBttn,
         { backgroundColor: colorBttn[selectedBtnColorIndex] },
       ]}
-      onPressIn={() => router.push(`./cours/${item.id}`)}
+      onPressIn={() => router.push(`/${item.id}`)}
       // onPress={() => router.push("/myscreen")}
     >
       <Image source={{ uri: item.photo_url }} style={styles.iconbutton} />

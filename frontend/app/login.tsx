@@ -13,14 +13,15 @@ import {
 } from "react-native";
 
 const { height } = Dimensions.get("window");
-const API_URL = "http:/192.168.11.106:5000";
+import { instance } from "../service/instance";
+import axios, { AxiosError } from "axios";
+// const API_URL = "http://192.168.11.106:5000";
 
 export default function LoginScreen() {
   const router = useRouter();
   //code///for//acces//menu//by..log
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-
   const handleLogin = async () => {
     if (!name || !password) {
       Alert.alert("Erreur", "Tous les champs sont obligatoires");
@@ -28,39 +29,42 @@ export default function LoginScreen() {
     }
 
     try {
-      const response = await fetch(`${API_URL}/auth/signin`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, password }),
+      const response = await instance.post("/auth/signin", {
+        nameUser: name,
+        password,
       });
 
-      const text = await response.text();
-      console.log("Réponse brute backend:", text);
-
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch {
-        console.log("Ce n'est pas du JSON !");
-        data = null;
-      }
-      console.log(data);
-      if (response.ok && data) {
-        Alert.alert("Succès", "Connexion réussie !");
-        setName("");
-        setPassword("");
-        router.push("/menu");
+      const data = response.data;
+      Alert.alert("Succès", "Connexion réussie !");
+      setName("");
+      setPassword("");
+      router.push("./menu");
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError<{ message: string }>;
+        if (axiosError.response) {
+          Alert.alert(
+            "Erreur",
+            axiosError.response.data?.message || "Erreur serveur"
+          );
+        } else if (axiosError.request) {
+          Alert.alert(
+            "Erreur",
+            "Impossible de contacter le serveur. Vérifiez votre connexion."
+          );
+        } else {
+          Alert.alert("Erreur", axiosError.message);
+        }
+      } else if (error instanceof Error) {
+        // Autres erreurs JS
+        Alert.alert("Erreur", error.message);
       } else {
-        Alert.alert("Erreur", data?.error || "Une erreur est survenue");
+        Alert.alert("Erreur", "Une erreur inconnue est survenue");
       }
-    } catch (err) {
-      console.log("Erreur catch:", err);
-      Alert.alert(
-        "Erreur",
-        "Impossible de se connecter, vérifiez vos identifiants"
-      );
+      console.log("Erreur Axios:", error);
     }
   };
+
   //code/////design////
   return (
     <View style={styles.container}>
@@ -87,13 +91,12 @@ export default function LoginScreen() {
 
       <TouchableOpacity
         style={[styles.button, { bottom: "15%" }]}
-        onPress={() => router.push("/menu")}
+        onPress={handleLogin}
       >
-        <Text style={styles.buttonText} onPress={handleLogin}>
-          se connecter
-        </Text>
+        <Text style={styles.buttonText}>se connecter</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => router.push("/account")}>
+
+      <TouchableOpacity onPress={() => router.push("./account")}>
         <Text style={[styles.linkText, { top: "5%" }]}>créer un compte</Text>
       </TouchableOpacity>
     </View>

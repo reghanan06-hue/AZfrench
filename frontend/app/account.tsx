@@ -1,10 +1,19 @@
 
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  Alert,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useRegister } from "@/service/auth/mutations";
 
+import { instance } from "../service/instance";
+import axios, { AxiosError } from "axios";
 export default function AccountScreen() {
   const [gender, setGender] = useState<"fille" | "garçon">("fille");
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -13,34 +22,74 @@ export default function AccountScreen() {
   const [password, setPassword] = useState("");
 
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
-  const { mutate,isLoading, isError, error, isSuccess } = useRegister();
-    // const { data, isLoading, isError, error } = useRegister();
-  
-
-  const handleSubmit = () => {
+  const handleSignup = async () => {
     if (!username || !email || !password) {
-      alert("Tous les champs sont obligatoires");
+      Alert.alert("Erreur", "Tous les champs sont obligatoires");
       return;
     }
 
-    mutate(
-      { nameUser: username, email, password, Genre: gender },
-      {
-        onSuccess: () => router.push("/menu"),
+    if (password.length < 6) {
+      Alert.alert(
+        "Erreur",
+        "Le mot de passe doit contenir au moins 6 caractères"
+      );
+      return;
+    }
+    setLoading(true);
+
+    try {
+      const response = await instance.post("/auth/signup", {
+        nameUser: username,
+        email,
+        password,
+        Genre: gender,
+        role: "user",
+      });
+
+      const data = response.data;
+
+      Alert.alert("Succès", "Connexion réussie !");
+      setUsername("");
+      setPassword("");
+      router.push("./login");
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError<{ message: string }>;
+        if (axiosError.response) {
+          Alert.alert(
+            "Erreur",
+            axiosError.response.data?.message || "Erreur serveur"
+          );
+        } else if (axiosError.request) {
+          Alert.alert(
+            "Erreur",
+            "Impossible de contacter le serveur. Vérifiez votre connexion."
+          );
+        } else {
+          Alert.alert("Erreur", axiosError.message);
+        }
+      } else if (error instanceof Error) {
+        Alert.alert("Erreur", error.message);
+      } else {
+        Alert.alert("Erreur", "Une erreur inconnue est survenue");
       }
-    );
+      console.log("Erreur Axios:", error);
+    }
   };
 
   return (
     <View style={styles.container}>
-      {/* Gender selection */}
       <View style={styles.genderContainer}>
         <TouchableOpacity
           style={[styles.genderCard, gender === "fille" && styles.activeCard]}
           onPress={() => setGender("fille")}
         >
-          <Image source={require("../assets/images/girl.png")} style={styles.avatar} />
+          <Image
+            source={require("../assets/images/girl.png")}
+            style={styles.avatar}
+          />
           <Text>Fille</Text>
         </TouchableOpacity>
 
@@ -48,18 +97,21 @@ export default function AccountScreen() {
           style={[styles.genderCard, gender === "garçon" && styles.activeCard]}
           onPress={() => setGender("garçon")}
         >
-          <Image source={require("../assets/images/boy.png")} style={styles.avatar} />
+          <Image
+            source={require("../assets/images/boy.png")}
+            style={styles.avatar}
+          />
           <Text>Garçon</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Inputs */}
       <TextInput
         placeholder="Nom d'utilisateur"
         style={styles.input}
         value={username}
         onChangeText={setUsername}
       />
+
       <TextInput
         placeholder="Email"
         style={styles.input}
@@ -67,6 +119,7 @@ export default function AccountScreen() {
         value={email}
         onChangeText={setEmail}
       />
+
       <View style={styles.passwordContainer}>
         <TextInput
           placeholder="Mot de passe"
@@ -76,23 +129,28 @@ export default function AccountScreen() {
           onChangeText={setPassword}
         />
         <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)}>
-          <Ionicons name={passwordVisible ? "eye-off" : "eye"} size={22} color="#2b35f2ff" />
+          <Ionicons
+            name={passwordVisible ? "eye-off" : "eye"}
+            size={22}
+            color="#4da6ff"
+          />
         </TouchableOpacity>
       </View>
 
-      {/* Submit Button */}
-      <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={isLoading}>
-        <Text style={styles.buttonText}>{isLoading ? "Création..." : "Créer compte"}</Text>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleSignup}
+        // disabled={loading}
+      >
+        <Text style={styles.buttonText}>
+          {loading ? "Création..." : "Créer compte"}
+          {/* CREER COMPTE */}
+        </Text>
       </TouchableOpacity>
-
-      {/* Feedback */}
-      {isError && <Text style={{ color: "red", marginTop: 10 }}>{error?.message}</Text>}
-      {isSuccess && <Text style={{ color: "green", marginTop: 10 }}>Compte créé avec succès 🎉</Text>}
     </View>
   );
 }
 
-// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -108,18 +166,18 @@ const styles = StyleSheet.create({
   genderCard: {
     width: "48%",
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: "#1a1919",
     borderRadius: 12,
     alignItems: "center",
-    padding: 15,
+    padding: 30,
   },
   activeCard: {
     borderColor: "#4da6ff",
-    backgroundColor: "#f0f8ff",
+    backgroundColor: "#ffffff",
   },
   avatar: {
     width: 100,
-    height: 100,
+    height: 200,
     marginBottom: 10,
   },
   input: {

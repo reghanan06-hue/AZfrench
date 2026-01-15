@@ -18,4 +18,4 @@ const options = {
   apis: [path.join(__dirname, "../routers/*.js")],
 };
 
-export const swaggerSpec = swaggerJsDoc(options); // named export
+export const swaggerSpec = swaggerJsDoc(options); 

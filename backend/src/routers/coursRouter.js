@@ -5,6 +5,11 @@ import {
     getCoursById
 } from "../controllers/CoursController.js";
 
+// import auth from "../middlewares/authMiddleware.js";     
+import authMiddleware from "../middlewares/authMiddleware.js";
+import isAdmin from "../middlewares/isAdmin.js";
+
+
 const router = express.Router();
 
 /**
@@ -89,8 +94,10 @@ router.get("/:id", getCoursById);
  * @swagger
  * /cours:
  *   post:
- *     summary: Créer un nouveau cours
+ *     summary: Créer un nouveau cours (admin seulement)
  *     tags: [Cours]
+ *     security:
+ *       - bearerAuth: []   # pour indiquer que le token JWT est requis
  *     requestBody:
  *       required: true
  *       content:
@@ -98,30 +105,30 @@ router.get("/:id", getCoursById);
  *           schema:
  *             type: object
  *             required:
- *               - user_id
  *               - title
  *             properties:
- *               user_id:
- *                 type: integer
  *               title:
  *                 type: string
- *               example:15
+ *                 example: "Transport en commun"
  *               description:
  *                 type: string
- *               example: "Ceci est un cours de moyens Transport."
+ *                 example: "Ceci est un cours de moyens Transport."
  *               photo_url:
  *                 type: string
- *               example: "https://example.com/course-image.png"
+ *                 example: "https://example.com/course-image.png"
  *               date_creation:
  *                 type: string
  *                 format: date
- *              example: "2024-12-01"
+ *                 example: "2024-12-01"
  *     responses:
  *       201:
  *         description: Cours créé avec succès
  *       400:
  *         description: Données invalides
+ *       401:
+ *         description: Non authentifié
+ *       403:
+ *         description: Accès refusé (non admin)
  */
-router.post("/", createCourse);
-
+router.post("/",authMiddleware,isAdmin, createCourse);
 export default router;

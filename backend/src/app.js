@@ -20,6 +20,8 @@ app.use("/auth", authRouters);
 // app.post('/signin', authRouters)
 
 app.use("/cours", CoursRouters);
+app.use("/cours/:id", CoursRouters);
+
 app.use("/lesson",LessonRouters);
 app.use("/exercise",ExerciseRouter);
 // swagger

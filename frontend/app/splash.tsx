@@ -80,7 +80,7 @@ export default function Account() {
           transform: [{ translateY: slideAnim }, { scale: scaleAnim }],
         }}
       >
-        <TouchableOpacity onPress={() => router.push("/login")}>
+        <TouchableOpacity onPress={() => router.push("./login")}>
           <Image
             source={require("../assets/images/AZicon.jpg")}
             style={styles.imagelogo}

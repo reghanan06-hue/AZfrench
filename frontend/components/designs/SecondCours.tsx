@@ -1,9 +1,11 @@
+
 import * as Speech from "expo-speech";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Dimensions,
   FlatList,
+  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -12,7 +14,6 @@ import {
 import { Easing } from "react-native";
 
 import ColorBall from "./ColorBall";
-
 import { useThemeStore } from "../../_store/useThemeStore";
 
 export default function Animal({ data }: any) {
@@ -21,8 +22,10 @@ export default function Animal({ data }: any) {
   const colorBttn = useThemeStore((s) => s.colorBttn);
   const selectedColorIndex = useThemeStore((s) => s.selectedColorIndex);
   const selectedBtnColorIndex = useThemeStore((s) => s.selectedBtnColorIndex);
+
   const [selectedColor, setSelectedColor] = useState<string>("");
   const [selectedName, setSelectedName] = useState<string>("");
+  const [selectedLesson, setSelectedLesson] = useState<any>(null); // lesson clické
 
   const { height } = Dimensions.get("window");
 
@@ -30,9 +33,8 @@ export default function Animal({ data }: any) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
-  const [lastText, setLastText] = useState<string | null>(null);
-
   useEffect(() => {
+    // Slide + fade animation
     Animated.parallel([
       Animated.timing(slideAnim, {
         toValue: 0,
@@ -47,6 +49,7 @@ export default function Animal({ data }: any) {
       }),
     ]).start();
 
+    //  animation!!!!!loopp
     Animated.loop(
       Animated.sequence([
         Animated.timing(scaleAnim, {
@@ -64,7 +67,6 @@ export default function Animal({ data }: any) {
   }, []);
 
   const speak = (text: string) => {
-    setLastText(text);
     Speech.stop();
     Speech.speak(text, { language: "fr-FR" });
   };
@@ -74,15 +76,18 @@ export default function Animal({ data }: any) {
 
     return (
       <TouchableOpacity
-        // style={[styles.card, { backgroundColor: colorFromName }]}
         style={[
           styles.card,
           { backgroundColor: colorBttn[selectedBtnColorIndex] },
         ]}
         onPress={() => {
-          setSelectedName(item.name_lesson);
-          setSelectedColor(colorFromName);
+          setSelectedLesson(item);
           speak(item.name_lesson);
+
+          if (data.title === "Les couleurs") {
+            setSelectedName(item.name_lesson);
+            setSelectedColor(colorFromName);
+          }
         }}
       >
         <Animated.Text
@@ -101,14 +106,32 @@ export default function Animal({ data }: any) {
         { backgroundColor: colors[selectedColorIndex] },
       ]}
     >
-      <Text style={styles.title}>{data.title}</Text>
+      <Text style={styles.titlename}>{data.title}</Text>
+
       <FlatList
         data={data?.Lessons}
         numColumns={3}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderItem}
       />
-      <ColorBall name={selectedName} mycolor={selectedColor} />
+
+      {/* Display ColorBall si data.title === "Les couleurs" */}
+      {data.title === "Les couleurs" ? (
+        <ColorBall name={selectedName} mycolor={selectedColor} />
+      ) : (
+        // Sinon afficher image du lesson sélectionné
+        selectedLesson &&
+        selectedLesson.photo_url && (
+          <View style={styles.previewCard}>
+            <Image
+              source={{ uri: selectedLesson.photo_url }}
+              style={styles.previewImage}
+              resizeMode="contain"
+            />
+            <Text style={styles.previewText}>{selectedLesson.name_lesson}</Text>
+          </View>
+        )
+      )}
     </View>
   );
 }
@@ -117,21 +140,43 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-
+  titlename: {
+    fontSize: 25,
+    fontWeight: "bold",
+    color: "#141313",
+    textAlign: "center",
+    marginTop: 10,
+  },
   title: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#191818",
     textAlign: "center",
-    marginTop: 60,
   },
-
   card: {
     flex: 1,
-    margin: 6,
+    margin: 4,
     borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
     height: 100,
+  },
+  previewCard: {
+    height: 200,
+    borderRadius: 20,
+    marginBottom: 100,
+    alignItems: "center",
+    justifyContent: "center",
+    // borderWidth: 3,
+    // borderColor: "#000",
+  },
+  previewImage: {
+    width: 250,
+    height: 250,
+  },
+  previewText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#191818",
   },
 });

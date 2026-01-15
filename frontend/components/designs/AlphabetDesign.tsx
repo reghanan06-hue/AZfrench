@@ -12,12 +12,13 @@ import {
 } from "react-native";
 import { Easing } from "react-native";
 import { useThemeStore } from "../../_store/useThemeStore";
+import { useRouter } from "expo-router";
 
 const { width } = Dimensions.get("window");
 const ITEM_SIZE = width * 0.85;
 const SPACING = 40;
 
-export default function AlphabetDesign({ data }: any) {
+export default function AlphabetDesign({ data, coursId }: any) {
   const colors = useThemeStore((s) => s.colors);
   const colorBttn = useThemeStore((s) => s.colorBttn);
   const selectedColorIndex = useThemeStore((s) => s.selectedColorIndex);
@@ -32,7 +33,7 @@ export default function AlphabetDesign({ data }: any) {
   const [currentLetter, setCurrentLetter] = useState<string | null>(null);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [lastText, setLastText] = useState<string | null>(null);
-
+  const router = useRouter();
   useEffect(() => {
     Animated.parallel([
       Animated.timing(slideAnim, {
@@ -71,10 +72,28 @@ export default function AlphabetDesign({ data }: any) {
     Speech.speak(text, { language: "fr-FR" });
   };
 
+  let isReapt = false;
+
   const repeatSound = () => {
     if (!lastText) return;
+
+    isReapt = true;
     Speech.stop();
-    Speech.speak(lastText, { language: "fr-FR" });
+
+    const loop = () => {
+      if (!isReapt) return;
+
+      Speech.speak(lastText, {
+        language: "fr-FR",
+        onDone: loop,
+      });
+    };
+
+    loop();
+  };
+  const stopRepeatSound = () => {
+    isReapt = false;
+    Speech.stop();
   };
 
   const renderItem = ({ item }: any) => (
@@ -155,6 +174,18 @@ export default function AlphabetDesign({ data }: any) {
               style={styles.iconbutton}
             />
           </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.btnSon,
+              { backgroundColor: colorBttn[selectedBtnColorIndex] },
+            ]}
+            onPress={stopRepeatSound}
+          >
+            <Image
+              source={require("../../assets/images/pauseBtn.png")}
+              style={styles.iconbutton}
+            />
+          </TouchableOpacity>
         </View>
       </Animated.View>
     </View>
@@ -166,7 +197,7 @@ const styles = StyleSheet.create({
   nameScree: {
     fontSize: 28,
     fontWeight: "bold",
-    marginTop: 30,
+    marginTop: 10,
     textAlign: "center",
   },
   textAlph: {
@@ -187,9 +218,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     width: "80%",
-    marginBottom: 350,
+    margin: 35,
+    marginBottom: 200,
   },
   btnSon: {
+    padding: 12,
+    borderRadius: 15,
+  },
+  btnStart: {
+    width: "60%",
+    alignSelf: "center",
     padding: 12,
     borderRadius: 15,
   },

@@ -49,26 +49,47 @@
 //   });
 // };
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, UseMutationResult } from "@tanstack/react-query";
 import { instance } from "@/service/instance";
+import axios from "axios";
 
-export const useRegister = () => {
+type RegisterData = {
+  nameUser: string;
+  email: string;
+  password: string;
+  Genre: "fille" | "garçon";
+};
+
+// Define the type of the response returned by your backend
+type RegisterResponse = {
+  message: string;
+  userId?: string;
+};
+
+export const useRegister = (): UseMutationResult<
+  RegisterResponse, // data returned on success
+  Error,            // error type
+  RegisterData,     // variables type (what mutate expects)
+  unknown           // context (optional, rarely used)
+> => {
   return useMutation({
-    mutationFn: async (data) => {
+    mutationFn: async (data: RegisterData) => {
       try {
-        const res = await instance.post("/signup", data);
+        const res = await instance.post<RegisterResponse>("auth/signup", data);
         return res.data;
-      } catch (error) {
-        error.response?.data?.message 
-        throw new Error(
-          error.response && error.response.data && error.response.data.message
-            ? error.response.data.message
-            : "Register failed"
-        );
+      } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+          throw new Error(
+            (error.response?.data as any)?.message || "Register failed"
+          );
+        }
+        throw new Error("Register failed");
       }
     },
   });
 };
+
+
 // import { useMutation } from "@tanstack/react-query";
 // import { instance } from "@/service/instance";
 

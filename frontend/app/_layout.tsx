@@ -11,9 +11,15 @@ export default function _layout() {
         <Stack.Screen name="login" />
         <Stack.Screen name="account" />
         <Stack.Screen name="menu" />
-        <Stack.Screen name="id" />
+        {/* 
+        <Stack.Screen
+          name="[id]"
+          options={{
+            title: "Lesson Details",
+            headerShown: false,
+          }}
+        /> */}
         <Stack.Screen name="numbers" />
-        {/* <Stack.Screen name="myscreen" /> */}
       </Stack>
     </QueryClientProvider>
   );

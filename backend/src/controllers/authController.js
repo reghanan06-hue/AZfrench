@@ -38,7 +38,7 @@ export const register = async (req, res) => {
       email,
       password: hashedPassword,
       Genre,
-      role: role || "user", // rôle par défaut si non fourni
+      role: role || "user", 
     });
 
     return res.status(201).json({
