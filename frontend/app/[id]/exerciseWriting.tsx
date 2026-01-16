@@ -2,81 +2,75 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
   StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Image,
   FlatList,
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useGetCoursById } from "@/service/course/queries";
 import { useThemeStore } from "../../_store/useThemeStore";
 
-interface Lesson {
-  id: number;
-  name_lesson: string;
-}
-
-interface CourseData {
-  id: number;
-  title: string;
-  Lessons: Lesson[];
-}
-
 export default function ExerciseLectureScreen() {
   const colors = useThemeStore((s) => s.colors);
-  const colorBttn = useThemeStore((s) => s.colorBttn);
   const selectedColorIndex = useThemeStore((s) => s.selectedColorIndex);
-  const selectedBtnColorIndex = useThemeStore((s) => s.selectedBtnColorIndex);
 
+  const [textWriting, setTextWriting] = useState("");
   const [correct, setCorrect] = useState(0);
   const [wrong, setWrong] = useState(0);
+  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const { id } = useLocalSearchParams<{ id?: string | string[] }>();
-  const coursId = Array.isArray(id) ? Number(id[0]) : Number(id);
+  const { id } = useLocalSearchParams<{ id?: string }>();
+  const coursId = Number(id);
 
-  const { data, isLoading, isError, error } = useGetCoursById(coursId);
+  const { data, isLoading } = useGetCoursById(coursId);
 
-  if (isLoading) return <Text style={styles.loading}>Loading...</Text>;
-
-  if (isError)
+  if (isLoading || !data?.Lessons?.length) {
     return (
-      <Text style={styles.error}>
-        Erreur: {error?.message || "Erreur inconnue"}
-      </Text>
+      <Text style={{ marginTop: 5, textAlign: "center" }}>Loading...</Text>
     );
+  }
 
-  if (!data || !data.Lessons || data.Lessons.length === 0)
-    return <Text style={styles.loading}>Aucune donnée trouvée</Text>;
+  const lessons = data.Lessons;
+  const currentLesson = lessons[currentIndex];
 
-  const currentLesson = data.Lessons[currentIndex];
-
-  const handlePress = (lessonName: string) => {
-    if (lessonName === currentLesson.name_lesson) {
-      setCorrect((prev) => prev + 1);
-    } else {
-      setWrong((prev) => prev + 1);
-    }
-
-    // Passer à la lettre suivante si existante
-    if (currentIndex + 1 < data.Lessons.length) {
-      setCurrentIndex((prev) => prev + 1);
-    } else {
-      alert(`Exercice terminé !\nCorrect: ${correct + 1}\nFaux: ${wrong}`);
-    }
+  const handleRetry = () => {
+    setTextWriting("");
+    setIsCorrect(null);
+    setCorrect(0);
+    setWrong(0);
+    setCurrentIndex(0);
   };
 
-  // const renderItem = ({ item }: { item: Lesson }) => (
-  const renderItem = ({ item }: any) => (
-    <TouchableOpacity
-      style={[
-        styles.card,
-        { backgroundColor: colorBttn[selectedBtnColorIndex] },
-      ]}
-      onPress={() => handlePress(item.name_lesson)}
-    >
-      <Text style={styles.text}>{item.name_lesson}</Text>
-    </TouchableOpacity>
-  );
+  const handleCheck = (value: string) => {
+    const letter = value.trim().toUpperCase();
+
+    if (!letter) {
+      setTextWriting("");
+      setIsCorrect(null);
+      return;
+    }
+
+    setTextWriting(letter);
+
+    if (letter === currentLesson.name_lesson.toUpperCase()) {
+      setCorrect((c) => c + 1);
+      setIsCorrect(true);
+
+      setTimeout(() => {
+        setTextWriting("");
+        setIsCorrect(null);
+        if (currentIndex + 1 < lessons.length) {
+          setCurrentIndex((i) => i + 1);
+        }
+      }, 700);
+    } else {
+      setWrong((w) => w + 1);
+      setIsCorrect(false);
+    }
+  };
 
   return (
     <View
@@ -85,26 +79,54 @@ export default function ExerciseLectureScreen() {
         { backgroundColor: colors[selectedColorIndex] },
       ]}
     >
-      <Text style={styles.title}>Exercice de lecture</Text>
-
-      <Text style={styles.question}>
-        Cliquez sur la lettre qui a le son "{currentLesson.name_lesson}"
+      <Text style={styles.title}>Exercice écriture</Text>
+      <Text style={styles.subtitle}>
+        {currentLesson.name_lesson === "A"
+          ? `Écris la lettre ${currentLesson.name_lesson}`
+          : currentLesson.name_lesson === "1"
+            ? `Écris le nombre ${currentLesson.name_lesson}`
+            : currentLesson.name_lesson === "BA"
+              ? `Écris la syllabe BA`
+              : `Écris le mot ${currentLesson.name_lesson}`}
       </Text>
 
+      {/* //Écris la syllabe BA */}
+
+      {/* ALPHABET */}
       <FlatList
-        data={data.Lessons}
-        numColumns={3}
+        data={lessons}
+        horizontal
         keyExtractor={(item) => item.id.toString()}
-        renderItem={renderItem}
-        columnWrapperStyle={{
-          justifyContent: "space-between",
-          marginBottom: 10,
+        showsHorizontalScrollIndicator={false}
+        style={{ flexGrow: 0 }}
+        renderItem={({ item, index }) => {
+          const isActive = index === currentIndex;
+
+          return (
+            <View
+              style={[
+                styles.letterItem,
+                isActive && styles.activeLetterItem,
+                isActive && isCorrect === true && styles.correctItem,
+                isActive && isCorrect === false && styles.wrongItem,
+              ]}
+            >
+              <Text style={styles.letterMini}>{item.name_lesson}</Text>
+            </View>
+          );
         }}
-        contentContainerStyle={styles.flatListContainer}
       />
-
-      <Text style={styles.resultTitle}>Résultat de l’exercice effectué</Text>
-
+      {/* INPUT */}
+      <TextInput
+        style={styles.input}
+        placeholder="Écrire..."
+        autoCapitalize="characters"
+        // maxLength={1}
+        value={textWriting}
+        onChangeText={handleCheck}
+      />
+      {/* RESULTATS */}
+      <Text style={styles.resultTitle}>Résultat de l’exercice</Text>
       <View style={styles.resultContainer}>
         <View style={styles.resultBox}>
           <Text style={styles.correctNumber}>{correct}</Text>
@@ -116,9 +138,32 @@ export default function ExerciseLectureScreen() {
           <Text style={styles.wrongText}>Faux</Text>
         </View>
       </View>
-
-      <Text style={styles.message}>Bravo, continue !</Text>
-      <Text style={styles.trophy}>🏆</Text>
+      {/* MESSAGE */}
+      {isCorrect === true && (
+        <>
+          <Text style={styles.success}>Bravo, continue !</Text>
+          <Image
+            source={require("../../assets/images/success.png")}
+            style={styles.emoji}
+          />
+        </>
+      )}
+      {isCorrect === false && (
+        <>
+          <Text style={styles.fail}>Essaie encore !</Text>
+          <Image
+            source={require("../../assets/images/thinking.png")}
+            style={styles.emoji}
+          />
+        </>
+      )}
+      {/* BOUTONS */}
+      <TouchableOpacity style={styles.retryButton} onPress={handleRetry}>
+        <Text style={styles.retryText}>ESSAYER À NOUVEAU</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.retryButton}>
+        <Text style={styles.retryText}>Enregistrer l’Exercice </Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -129,53 +174,45 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     alignItems: "center",
   },
-  loading: {
-    textAlign: "center",
-    marginTop: 50,
-    fontSize: 16,
-  },
-  error: {
-    color: "red",
-    textAlign: "center",
-    marginTop: 50,
-    fontSize: 16,
-  },
   title: {
     fontSize: 22,
     fontWeight: "bold",
-    marginBottom: 20,
   },
-  question: {
+  subtitle: {
     fontSize: 16,
-    marginBottom: 20,
-    textAlign: "center",
+    marginVertical: 19,
   },
-  flatListContainer: {
-    paddingHorizontal: 10,
-    marginBottom: 30,
-  },
-  // card: {
-  //   width: "30%",
-  //   flex: 1,
-  //   margin: 4,
-  //   borderRadius: 16,
-  //   alignItems: "center",
-  //   justifyContent: "center",
-  //   height: 100,
-  //   backgroundColor: "#c92626",
-  // },
-  card: {
-    flex: 1,
-    margin: 4,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    height: 100,
-  },
-  cardText: {
-    fontSize: 20,
+  letterMini: {
+    fontSize: 60,
     fontWeight: "bold",
-    color: "#000",
+  },
+  letterItem: {
+    width: 380,
+    height: 280,
+    marginHorizontal: 6,
+    marginBottom: 19,
+    marginLeft: 15,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 25,
+    backgroundColor: "#d0caca",
+  },
+  activeLetterItem: {
+    backgroundColor: "#FFD700",
+    transform: [{ scale: 1.1 }],
+  },
+  correctItem: {
+    backgroundColor: "green",
+  },
+  wrongItem: {
+    backgroundColor: "red",
+  },
+  input: {
+    fontSize: 60,
+    borderBottomWidth: 1,
+    textAlign: "center",
+    width: 200,
+    marginTop: 5,
   },
   resultTitle: {
     fontSize: 16,
@@ -183,9 +220,8 @@ const styles = StyleSheet.create({
   },
   resultContainer: {
     flexDirection: "row",
-    justifyContent: "space-around",
     width: "60%",
-    marginBottom: 80,
+    justifyContent: "space-around",
   },
   resultBox: {
     alignItems: "center",
@@ -206,19 +242,33 @@ const styles = StyleSheet.create({
   wrongText: {
     color: "red",
   },
-  message: {
-    fontSize: 16,
+  success: {
     color: "green",
+    fontSize: 16,
     fontWeight: "bold",
     marginTop: 10,
   },
-  trophy: {
-    fontSize: 50,
-    marginBottom: 80,
-  },
-  text: {
-    fontSize: 90,
+  fail: {
+    color: "red",
+    fontSize: 16,
     fontWeight: "bold",
-    color: "#a52525",
+    marginTop: 10,
+  },
+  emoji: {
+    width: 115,
+    height: 115,
+    marginTop: 5,
+  },
+  retryButton: {
+    backgroundColor: "#1e90ff",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    marginTop: 10,
+    borderRadius: 10,
+  },
+  retryText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });

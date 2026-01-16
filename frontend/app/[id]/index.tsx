@@ -51,14 +51,12 @@ export default function CoursScreen() {
     return <SecondCours data={data} coursId={coursId} />;
   }
   if (titleLower.includes("couleurs")) {
-    return (
-      <>
-        <SecondCours data={data} coursId={coursId} />
-        {/* <mycreen /> */}
-      </>
-    );
+    return <SecondCours data={data} coursId={coursId} />;
   }
-
+  //les métiers
+  if (titleLower.includes("métiers")) {
+    return <SecondCours data={data} coursId={coursId} />;
+  }
   console.log(titleLower);
   return (
     <Text style={{ fontSize: 24, textAlign: "center", marginTop: 50 }}>
