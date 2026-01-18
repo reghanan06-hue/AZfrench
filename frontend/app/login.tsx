@@ -1,4 +1,3 @@
-import { useRoute } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -10,18 +9,20 @@ import {
   ImageBackground,
   Dimensions,
   Alert,
+  ActivityIndicator,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios, { AxiosError } from "axios";
+import { instance } from "../service/instance";
 
 const { height } = Dimensions.get("window");
-import { instance } from "../service/instance";
-import axios, { AxiosError } from "axios";
-// const API_URL = "http://192.168.11.106:5000";
 
 export default function LoginScreen() {
   const router = useRouter();
-  //code///for//acces//menu//by..log
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const handleLogin = async () => {
     if (!name || !password) {
       Alert.alert("Erreur", "Tous les champs sont obligatoires");
@@ -29,43 +30,55 @@ export default function LoginScreen() {
     }
 
     try {
+      setLoading(true);
+
+      // Appel API login
       const response = await instance.post("/auth/signin", {
         nameUser: name,
         password,
       });
 
-      const data = response.data;
-      Alert.alert("Succès", "Connexion réussie !");
+      const { token, user } = response.data;
+
+      if (!token || !user) {
+        return Alert.alert("Erreur", "Token ou utilisateur invalide");
+      }
+
+      // Stockage dans AsyncStorage
+      // Stockage token, role et userId
+      await AsyncStorage.setItem("token", token);
+      await AsyncStorage.setItem("role", user.role);
+      await AsyncStorage.setItem("userId", String(user.id)); // <-- conversion number -> string
+
+      // Alert succès et navigation après clic sur OK
+      Alert.alert("Succès", "Connexion réussie !", [
+        {
+          text: "OK",
+          onPress: () => {
+            if (user.role === "admin") router.replace("/AddCourseScreen");
+            else router.replace("/menu");
+          },
+        },
+      ]);
+
+      // Reset champs
       setName("");
       setPassword("");
-      router.push("./menu");
     } catch (error: unknown) {
+      let message = "Une erreur inconnue est survenue";
       if (axios.isAxiosError(error)) {
         const axiosError = error as AxiosError<{ message: string }>;
-        if (axiosError.response) {
-          Alert.alert(
-            "Erreur",
-            axiosError.response.data?.message || "Erreur serveur"
-          );
-        } else if (axiosError.request) {
-          Alert.alert(
-            "Erreur",
-            "Impossible de contacter le serveur. Vérifiez votre connexion."
-          );
-        } else {
-          Alert.alert("Erreur", axiosError.message);
-        }
+        message = axiosError.response?.data?.message || message;
       } else if (error instanceof Error) {
-        // Autres erreurs JS
-        Alert.alert("Erreur", error.message);
-      } else {
-        Alert.alert("Erreur", "Une erreur inconnue est survenue");
+        message = error.message;
       }
-      console.log("Erreur Axios:", error);
+      Alert.alert("Erreur", message);
+      console.log("Erreur login:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  //code/////design////
   return (
     <View style={styles.container}>
       <ImageBackground
@@ -74,47 +87,46 @@ export default function LoginScreen() {
         resizeMode="contain"
       >
         <TextInput
-          placeholder="Nom d'utilisation"
+          placeholder="Nom d'utilisateur"
           style={[styles.input, { top: "52%" }]}
           value={name}
           onChangeText={setName}
+          autoCapitalize="none"
+          autoCorrect={false}
         />
-
         <TextInput
           placeholder="Mot de passe"
           secureTextEntry
           style={[styles.input, { top: "62%" }]}
           value={password}
           onChangeText={setPassword}
+          autoCapitalize="none"
+          autoCorrect={false}
         />
       </ImageBackground>
 
       <TouchableOpacity
         style={[styles.button, { bottom: "15%" }]}
         onPress={handleLogin}
+        disabled={loading}
       >
-        <Text style={styles.buttonText}>se connecter</Text>
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>Se connecter</Text>
+        )}
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => router.push("./account")}>
-        <Text style={[styles.linkText, { top: "5%" }]}>créer un compte</Text>
+      <TouchableOpacity onPress={() => router.push("/account")}>
+        <Text style={[styles.linkText, { top: "5%" }]}>Créer un compte</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-  },
-
-  image: {
-    width: "100%",
-    height: height * 0.7,
-  },
-
+  container: { flex: 1, alignItems: "center", backgroundColor: "#fff" },
+  image: { width: "100%", height: height * 0.7 },
   input: {
     position: "absolute",
     alignSelf: "center",
@@ -124,7 +136,6 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
   },
-
   button: {
     width: "80%",
     backgroundColor: "#76C9F0",
@@ -132,15 +143,6 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     alignItems: "center",
   },
-
-  buttonText: {
-    fontSize: 18,
-    fontWeight: "600",
-  },
-
-  linkText: {
-    marginTop: 10,
-    color: "#3B4CCA",
-    fontStyle: "italic",
-  },
+  buttonText: { fontSize: 18, fontWeight: "600" },
+  linkText: { color: "#3B4CCA", fontStyle: "italic" },
 });

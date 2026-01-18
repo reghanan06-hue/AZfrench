@@ -8,7 +8,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node --watch src/app.js",
     "seed:cours": "node src/seeders/course.js",
-    "seed:Lecon": "node src/seeders/Lecon.js"
+    "seed:Lecon": "node src/seeders/Lecon.js",
+    "seed:users": "node src/seeders/users.js"
+
   },
   "keywords": [],
   "author": "",

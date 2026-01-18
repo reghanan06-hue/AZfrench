@@ -3,15 +3,14 @@ import Exercise from "../models/Exercise.js";
 
 export const createExercise = async (req, res) => {
   try {
-    const { lecon_id, date_exercice, niveau, type } = req.body;
+    const { lecon_id, niveau, type } = req.body;
 
-    if (!lecon_id || !date_exercice || !niveau || !type) {
+    if (!lecon_id  || !niveau || !type) {
       return res.status(400).json({ message: "Missing fields" });
     }
 
     const exercise = await Exercise.create({
       lecon_id,
-      date_exercice,
       niveau,
       type,
     });

@@ -19,7 +19,8 @@ export default function _layout() {
             headerShown: false,
           }}
         /> */}
-        <Stack.Screen name="numbers" />
+        <Stack.Screen name="AddCourseScreen" />
+        <Stack.Screen name="dashboaed" />
       </Stack>
     </QueryClientProvider>
   );

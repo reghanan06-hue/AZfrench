@@ -4,13 +4,14 @@ import Lesson from "../models/Lesson.js";
 
 export const createCourse = async (req, res) => {
   try {
-    const { user_id, title, descreption, date_creation } = req.body;
-
+    const {title, description, date_creation,photo_url } = req.body;
+  const user_id = req.user.id;
     const cours = await Cours.create({
       user_id,
       title,
-      descreption,
+      description,
       date_creation,
+      photo_url
     });
   
     res.status(201).json({

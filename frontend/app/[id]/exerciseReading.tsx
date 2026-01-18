@@ -1,503 +1,452 @@
 // import * as Speech from "expo-speech";
-
-// import React, { useState } from "react";
+// import React, { useState, useEffect } from "react";
 // import {
 //   View,
 //   Text,
-//   TouchableOpacity,
 //   StyleSheet,
+//   TextInput,
+//   TouchableOpacity,
+//   Image,
 //   FlatList,
 //   Alert,
 // } from "react-native";
 // import { useLocalSearchParams } from "expo-router";
 // import { useGetCoursById } from "@/service/course/queries";
-// // On garde les imports même si on utilise des styles hardcodés pour matcher l'image
 // import { useThemeStore } from "../../_store/useThemeStore";
-
-// interface Lesson {
-//   id: number;
-//   name_lesson: string;
-// }
+// import { instance } from "../../service/instance.js";
 
 // export default function ExerciseLectureScreen() {
-//   // On garde les hooks du thème, mais on surchargera les couleurs pour l'exercice visuel
 //   const colors = useThemeStore((s) => s.colors);
+//   const selectedColorIndex = useThemeStore((s) => s.selectedColorIndex);
 
+//   const [textWriting, setTextWriting] = useState("");
 //   const [correct, setCorrect] = useState(0);
 //   const [wrong, setWrong] = useState(0);
+//   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
 //   const [currentIndex, setCurrentIndex] = useState(0);
-//   const [currentLetter, setCurrentLetter] = useState<string | null>(null);
-// const [selectedLesson, setSelectedLesson] = useState<string | null>(null);
-// const [answerStatus, setAnswerStatus] = useState<"correct" | "wrong" | null>(null);
+//   const [isFinished, setIsFinished] = useState(false);
 
-//   const { id } = useLocalSearchParams<{ id?: string | string[] }>();
+//   const { id } = useLocalSearchParams<{ id?: string }>();
+//   const coursId = Number(id);
 
-//   console.log(id);
-//   const coursId = Array.isArray(id) ? Number(id[0]) : Number(id);
+//   const { data, isLoading } = useGetCoursById(coursId);
 
-//   const { data, isLoading, isError, error } = useGetCoursById(coursId);
-
-//   if (isLoading) return <Text style={styles.loading}>Chargement...</Text>;
-//   if (isError)
-//     return <Text style={styles.error}>Erreur: {error?.message}</Text>;
-//   if (!data || !data.Lessons || data.Lessons.length === 0)
-//     return <Text style={styles.loading}>Aucune donnée trouvée</Text>;
-
-//   const currentLesson = data.Lessons[currentIndex];
-
-//   const speak = (letter: string) => {
+//   /* ---------------- SPEECH ---------------- */
+//   const speak = (text: string) => {
 //     Speech.stop();
-//     Speech.speak(`Cliquez sur la lettre qui fait le son ${letter}`, {
+//     Speech.speak(`Cliquez sur la lettre ${text}`, {
 //       language: "fr-FR",
+//       rate: 0.9,
 //     });
 //   };
 
-//   const handlePress = (lessonName: string) => {
-//     const isCorrect = lessonName === currentLesson.name_lesson;
+//   /* 🔊 useEffect TOUJOURS AVANT return */
+//   useEffect(() => {
+//     if (!data?.Lessons?.length) return;
+//     if (isFinished) return;
 
-//     if (isCorrect) {
-//       setCorrect((prev) => prev + 1);
-//       Alert.alert("Bravo !", "Bonne réponse");
-//     } else {
-//       setWrong((prev) => prev + 1);
-//       Alert.alert("Oups", "Mauvaise réponse");
+//     const lesson = data.Lessons[currentIndex];
+//     if (lesson?.name_lesson) {
+//       speak(lesson.name_lesson);
 //     }
+//   }, [currentIndex, isFinished, data]);
 
-//     if (currentIndex + 1 < data.Lessons.length) {
-//       setCurrentIndex((prev) => prev + 1);
+//   /* ---------------- LOADING ---------------- */
+//   if (isLoading || !data?.Lessons?.length) {
+//     return (
+//       <Text style={{ marginTop: 20, textAlign: "center" }}>Chargement...</Text>
+//     );
+//   }
+
+//   const lessons = data.Lessons;
+//   const currentLesson = lessons[currentIndex];
+
+//   /* ---------------- NIVEAU ---------------- */
+//   const getExerciseLevel = () => {
+//     if (correct > wrong) return "niveau1";
+//     if (correct === wrong) return "niveau2";
+//     return "niveau3";
+//   };
+
+//   /* ---------------- RETRY ---------------- */
+//   const handleRetry = () => {
+//     Speech.stop();
+//     setTextWriting("");
+//     setCorrect(0);
+//     setWrong(0);
+//     setIsCorrect(null);
+//     setCurrentIndex(0);
+//     setIsFinished(false);
+//   };
+
+//   /* ---------------- CHECK ---------------- */
+//   const handleCheck = (value: string) => {
+//     if (isFinished) return;
+
+//     const input = value.trim().toUpperCase();
+//     setTextWriting(value);
+
+//     if (!input) return;
+
+//     if (input === currentLesson.name_lesson.toUpperCase()) {
+//       setCorrect((c) => c + 1);
+//       setIsCorrect(true);
+
+//       setTimeout(() => {
+//         setTextWriting("");
+//         setIsCorrect(null);
+
+//         if (currentIndex + 1 < lessons.length) {
+//           setCurrentIndex((i) => i + 1);
+//         } else {
+//           Speech.stop();
+//           setIsFinished(true);
+//         }
+//       }, 700);
+//     } else {
+//       setWrong((w) => w + 1);
+//       setIsCorrect(false);
 //     }
 //   };
 
-//   // --- RENDU D'UN BOUTON (LETTRE) ---
-//   const renderItem = ({ item }: { item: Lesson }) => {
-//     const isTarget = item.name_lesson === currentLesson.name_lesson;
+//   /* ---------------- SAVE ---------------- */
+//   const handleSaveExercise = async () => {
+//     if (!isFinished) return;
 
-//     return (
-//       <TouchableOpacity
-//         style={[
-//           styles.card,
-//           { backgroundColor: isTarget ? "#BAEBF9" : "#1dd88d" }, // Vert vs Bleu Ciel
-//         ]}
-//         onPress={() => {
-//           handlePress(item.name_lesson);
-//           speak(item.name_lesson);
-//         }}
-//       >
-//         <Text style={styles.cardText}>{item.name_lesson}</Text>
-//         setCurrentLetter(item.name_lesson); speak(item.name_lesson);
-//       </TouchableOpacity>
-//     );
+//     try {
+//       const niveau = getExerciseLevel();
+
+//       await instance.post("/exercise", {
+//         lecon_id: coursId,
+//         niveau,
+//         type: "écoute",
+//       });
+
+//       Alert.alert("Succès", `Exercice enregistré (${niveau}) ✅`);
+//     } catch (error) {
+//       Alert.alert("Erreur", "Erreur lors de l’enregistrement ❌");
+//     }
 //   };
 
 //   return (
-//     <View style={styles.container}>
-//       {/* Titre */}
-//       <Text style={styles.title}>Exercice de lecture</Text>
+//     <View
+//       style={[
+//         styles.container,
+//         { backgroundColor: colors[selectedColorIndex] },
+//       ]}
+//     >
+//       <Text style={styles.title}>Exercice ecoute</Text>
 
-//       {/* Question combinée */}
-//       <View style={styles.questionContainer}>
-//         <Text style={styles.questionText}>
-//           Cliquez sur la lettre qui le son{" "}
-//           <Text style={styles.targetLetter}>{currentLesson.name_lesson}</Text>
+//       {!isFinished ? (
+//         <Text style={styles.subtitle}>
+//           Cliquez sur : {currentLesson.name_lesson}
 //         </Text>
-//         {/* setCurrentLetter(item.name_lesson); */}
-//       </View>
+//       ) : (
+//         <Text style={styles.finishText}>🎉 Exercice terminé !</Text>
+//       )}
 
-//       {/* Grille de réponses */}
-//       <View style={styles.listContainer}>
-//         <FlatList
-//           data={data.Lessons}
-//           horizontal
-//           scrollEnabled={true}
-//           keyExtractor={(item) => item.id.toString()}
-//           renderItem={renderItem}
-//         />
+//       <FlatList
+//         data={lessons}
+//         horizontal
+//         keyExtractor={(item) => item.id.toString()}
+//         showsHorizontalScrollIndicator={false}
+//         style={{ flexGrow: 0 }}
+//         renderItem={({ item, index }) => {
+//           const isActive = index === currentIndex;
 
-//         {/* <FlatList
-//           // Modifiez cette ligne :
-//           // data={data.Lessons.slice(0, 3)}
-//             data={data.Lessons}
-
-//           // data={data.Lessons}
-//           numColumns={3}
-//           keyExtractor={(item) => item.id.toString()}
-//           renderItem={renderItem}
-//           columnWrapperStyle={styles.columnWrapper}
-//           scrollEnabled={false}
-//         /> */}
-//       </View>
-
-//       {/* Section Résultats */}
-//       <Text style={styles.resultTitle}>Résultat de l'exercice effectué</Text>
+//           return (
+//             <TouchableOpacity
+//               onPress={() => speak(item.name_lesson)}
+//               style={[
+//                 styles.letterItem,
+//                 isActive && styles.activeLetterItem,
+//                 isActive && isCorrect === true && styles.correctItem,
+//                 isActive && isCorrect === false && styles.wrongItem,
+//               ]}
+//             >
+//               <Text style={styles.letterMini}>{item.name_lesson}</Text>
+//             </TouchableOpacity>
+//           );
+//         }}
+//       />
 
 //       <View style={styles.resultContainer}>
-//         <View style={styles.resultBox}>
-//           <Text style={styles.correctNumber}>{correct}</Text>
-//           <Text style={styles.correctLabel}>Correct</Text>
-//         </View>
-
-//         <View style={styles.resultBox}>
-//           <Text style={styles.wrongNumber}>{wrong}</Text>
-//           <Text style={styles.wrongLabel}>Faux</Text>
-//         </View>
+//         <Text style={{ color: "green" }}>✔ {correct}</Text>
+//         <Text style={{ color: "red" }}>✖ {wrong}</Text>
 //       </View>
 
-//       {/* Message de fin */}
-//       <Text style={styles.message}>Bravo, continue !</Text>
-//       <Text style={styles.trophy}>🏆</Text>
+//       <TouchableOpacity style={styles.retryButton} onPress={handleRetry}>
+//         <Text style={styles.retryText}>ESSAYER À NOUVEAU</Text>
+//       </TouchableOpacity>
+
+//       <TouchableOpacity
+//         style={[styles.retryButton, !isFinished && styles.disabledButton]}
+//         onPress={handleSaveExercise}
+//         disabled={!isFinished}
+//       >
+//         <Text style={styles.retryText}>ENREGISTRER EXERCICE</Text>
+//       </TouchableOpacity>
 //     </View>
 //   );
 // }
 
+// /* ---------------- STYLES ---------------- */
+
 // const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     paddingTop: 60,
-//     alignItems: "center",
-//     backgroundColor: "#fff", // Fond blanc comme sur l'image
-//     paddingHorizontal: 20,
-//   },
-//   loading: {
-//     textAlign: "center",
-//     marginTop: 50,
-//     fontSize: 16,
-//   },
-//   error: {
-//     color: "red",
-//     textAlign: "center",
-//     marginTop: 50,
-//   },
-//   title: {
-//     fontSize: 20,
-//     fontWeight: "bold",
-//     marginBottom: 40,
-//     color: "#000",
-//   },
-//   questionContainer: {
-//     marginBottom: 30,
-//   },
-//   questionText: {
-//     fontSize: 16,
-//     fontWeight: "600",
-//     color: "#000",
-//     textAlign: "center",
-//   },
-//   targetLetter: {
-//     fontWeight: "bold",
-//     fontSize: 18,
-//     color: "#000",
-//   },
-//   listContainer: {
-//     width: "100%",
-//     marginBottom: 40,
-//   },
-//   columnWrapper: {
-//     justifyContent: "space-around", // Espacement égal entre les boutons
-//     gap: 10,
-//   },
-//   card: {
-//     width: 190,
-//     height: 190,
-//     borderRadius: 15,
-//     alignItems: "center",
+//   container: { flex: 1, paddingTop: 50, alignItems: "center" },
+//   title: { fontSize: 22, fontWeight: "bold" },
+//   subtitle: { fontSize: 16, marginVertical: 15 },
+//   finishText: { fontSize: 18, color: "green", fontWeight: "bold" },
+//   letterItem: {
+//     width: 360,
+//     height: 260,
+//     borderRadius: 25,
 //     justifyContent: "center",
-//     // La couleur de fond est gérée dynamiquement dans le renderItem
-//     shadowColor: "#000",
-//     shadowOffset: { width: 0, height: 2 },
-//     shadowOpacity: 0.1,
-//     shadowRadius: 4,
-//     elevation: 3,
-//     backgroundColor: "#BAEBF9",
-//     marginLeft: 19,
-//   },
-//   cardText: {
-//     fontSize: 40,
-//     fontWeight: "900", // Très gras
-//     color: "#000",
-//   },
-//   resultTitle: {
-//     fontSize: 14,
-//     fontWeight: "600",
-//     marginBottom: 20,
-//     color: "#000",
-//   },
-//   resultContainer: {
-//     flexDirection: "row",
-//     justifyContent: "space-between",
-//     width: "60%",
-//     marginBottom: 30,
-//   },
-//   resultBox: {
 //     alignItems: "center",
+//     backgroundColor: "#d0caca",
+//     marginBottom: 15,
 //   },
-//   correctNumber: {
-//     fontSize: 32,
-//     fontWeight: "bold",
-//     color: "#00B32C", // Vert
+//   activeLetterItem: { backgroundColor: "#FFD700" },
+//   correctItem: { backgroundColor: "green" },
+//   wrongItem: { backgroundColor: "red" },
+//   letterMini: { fontSize: 60, fontWeight: "bold" },
+//   input: {
+//     fontSize: 60,
+//     borderBottomWidth: 1,
+//     width: 200,
+//     textAlign: "center",
 //   },
-//   correctLabel: {
-//     fontSize: 14,
-//     color: "#00B32C",
-//     fontWeight: "600",
+//   resultContainer: { flexDirection: "row", gap: 20, marginTop: 10 },
+//   retryButton: {
+//     backgroundColor: "#1e90ff",
+//     padding: 12,
+//     borderRadius: 10,
+//     marginTop: 10,
 //   },
-//   wrongNumber: {
-//     fontSize: 32,
-//     fontWeight: "bold",
-//     color: "#FF3333", // Rouge
-//   },
-//   wrongLabel: {
-//     fontSize: 14,
-//     color: "#FF3333",
-//     fontWeight: "600",
-//   },
-//   message: {
-//     fontSize: 18,
-//     color: "#00B32C",
-//     fontWeight: "bold",
-//     marginBottom: 10,
-//   },
-//   trophy: {
-//     fontSize: 50,
-//   },
+//   disabledButton: { backgroundColor: "#999" },
+//   retryText: { color: "#fff", fontWeight: "bold" },
 // });
+
 import * as Speech from "expo-speech";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
   StyleSheet,
+  TouchableOpacity,
   FlatList,
+  Alert,
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useGetCoursById } from "@/service/course/queries";
 import { useThemeStore } from "../../_store/useThemeStore";
-
-interface Lesson {
-  id: number;
-  name_lesson: string;
-}
+import { instance } from "../../service/instance.js";
 
 export default function ExerciseLectureScreen() {
   const colors = useThemeStore((s) => s.colors);
+  const selectedColorIndex = useThemeStore((s) => s.selectedColorIndex);
 
   const [correct, setCorrect] = useState(0);
   const [wrong, setWrong] = useState(0);
+  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isFinished, setIsFinished] = useState(false);
 
-  const [selectedLesson, setSelectedLesson] = useState<string | null>(null);
-  const [answerStatus, setAnswerStatus] = useState<"correct" | "wrong" | null>(
-    null
-  );
+  const { id } = useLocalSearchParams<{ id?: string }>();
+  const coursId = Number(id);
 
-  const { id } = useLocalSearchParams<{ id?: string | string[] }>();
-  const coursId = Array.isArray(id) ? Number(id[0]) : Number(id);
+  const { data, isLoading } = useGetCoursById(coursId);
 
-  const { data, isLoading, isError, error } = useGetCoursById(coursId);
-
-  if (isLoading) return <Text style={styles.loading}>Chargement...</Text>;
-  if (isError)
-    return <Text style={styles.error}>Erreur: {error?.message}</Text>;
-  if (!data || !data.Lessons || data.Lessons.length === 0)
-    return <Text style={styles.loading}>Aucune donnée trouvée</Text>;
-
-  const currentLesson = data.Lessons[currentIndex];
-
-  const speak = (letter: string) => {
+  /* ---------------- SPEECH ---------------- */
+  const lit = (text: string) => {
     Speech.stop();
-    Speech.speak(`Cliquez sur la lettre ${letter}`, {
+    Speech.speak(`Cliquez sur : ${text}`, {
       language: "fr-FR",
+      rate: 0.9,
     });
   };
 
-  const handlePress = (lessonName: string) => {
-    const isCorrect = lessonName === currentLesson.name_lesson;
+  /* ---------------- AUTO READ ---------------- */
+  useEffect(() => {
+    if (!data?.Lessons?.length) return;
+    if (isFinished) return;
 
-    setSelectedLesson(lessonName);
-    setAnswerStatus(isCorrect ? "correct" : "wrong");
-
-    if (isCorrect) {
-      setCorrect((prev) => prev + 1);
-    } else {
-      setWrong((prev) => prev + 1);
+    const lesson = data.Lessons[currentIndex];
+    if (lesson?.name_lesson) {
+      lit(lesson.name_lesson);
     }
+  }, [currentIndex, isFinished, data]);
 
-    setTimeout(() => {
-      setSelectedLesson(null);
-      setAnswerStatus(null);
+  /* ---------------- LOADING ---------------- */
+  if (isLoading || !data?.Lessons?.length) {
+    return (
+      <Text style={{ marginTop: 20, textAlign: "center" }}>Chargement...</Text>
+    );
+  }
 
-      if (currentIndex + 1 < data.Lessons.length) {
-        setCurrentIndex((prev) => prev + 1);
-      }
-    }, 800);
+  const lessons = data.Lessons;
+  const currentLesson = lessons[currentIndex];
+
+  /* ---------------- LEVEL ---------------- */
+  const getExerciseLevel = () => {
+    if (correct > wrong) return "niveau1";
+    if (correct === wrong) return "niveau2";
+    return "niveau3";
   };
 
-  const renderItem = ({ item }: { item: Lesson }) => {
-    const isSelected = item.name_lesson === selectedLesson;
+  /* ---------------- RETRY ---------------- */
+  const handleRetry = () => {
+    Speech.stop();
+    setCorrect(0);
+    setWrong(0);
+    setIsCorrect(null);
+    setCurrentIndex(0);
+    setIsFinished(false);
+  };
 
-    let backgroundColor = "#BAEBF9"; // default
+  /* ---------------- CHECK ---------------- */
+  const handleCheck = (value: string) => {
+    if (isFinished) return;
 
-    if (isSelected && answerStatus === "correct") {
-      backgroundColor = "#00B32C"; // green
+    if (value.toUpperCase() === currentLesson.name_lesson.toUpperCase()) {
+      setCorrect((c) => c + 1);
+      setIsCorrect(true);
+
+      setTimeout(() => {
+        setIsCorrect(null);
+
+        if (currentIndex + 1 < lessons.length) {
+          setCurrentIndex((i) => i + 1);
+        } else {
+          Speech.stop();
+          setIsFinished(true);
+        }
+      }, 700);
+    } else {
+      setWrong((w) => w + 1);
+      setIsCorrect(false);
     }
+  };
 
-    if (isSelected && answerStatus === "wrong") {
-      backgroundColor = "#FF3333"; // red
+  /* ---------------- SAVE ---------------- */
+  const handleSaveExercise = async () => {
+    if (!isFinished) return;
+
+    try {
+      const niveau = getExerciseLevel();
+
+      await instance.post("/exercise", {
+        lecon_id: coursId,
+        niveau,
+        type: "écoute",
+      });
+
+      Alert.alert("Succès", `Exercice enregistré (${niveau}) ✅`);
+    } catch (error) {
+      Alert.alert("Erreur", "Erreur lors de l’enregistrement ❌");
     }
-
-    return (
-      <TouchableOpacity
-        style={[styles.card, { backgroundColor }]}
-        onPress={() => {
-          handlePress(item.name_lesson);
-          speak(item.name_lesson);
-        }}
-        disabled={!!selectedLesson}
-      >
-        <Text style={styles.cardText}>{item.name_lesson}</Text>
-      </TouchableOpacity>
-    );
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Exercice de lecture</Text>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: colors[selectedColorIndex] },
+      ]}
+    >
+      <Text style={styles.title}>Exercice écoute</Text>
 
-      <View style={styles.questionContainer}>
-        <Text style={styles.questionText}>
-          Cliquez sur la lettre :
-          <Text style={styles.targetLetter}> {currentLesson.name_lesson}</Text>
+      {!isFinished ? (
+        <Text style={styles.subtitle}>
+          Cliquez sur : {currentLesson.name_lesson}
         </Text>
-      </View>
+      ) : (
+        <Text style={styles.finishText}>🎉 Exercice terminé !</Text>
+      )}
 
-      <View style={styles.listContainer}>
-        <FlatList
-          data={data.Lessons}
-          horizontal
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={renderItem}
-          showsHorizontalScrollIndicator={false}
-        />
-      </View>
+      <FlatList
+        data={lessons}
+        horizontal
+        keyExtractor={(item) => item.id.toString()}
+        showsHorizontalScrollIndicator={false}
+        style={{ flexGrow: 0 }}
+        renderItem={({ item, index }) => {
+          const isActive = index === currentIndex;
 
-      <Text style={styles.resultTitle}>Résultat de l'exercice</Text>
+          return (
+            <TouchableOpacity
+              onPress={() => {
+                lit(item.name_lesson);
+                handleCheck(item.name_lesson);
+              }}
+              style={[
+                styles.letterItem,
+                isActive && styles.activeLetterItem,
+                isActive && isCorrect === true && styles.correctItem,
+                isActive && isCorrect === false && styles.wrongItem,
+              ]}
+            >
+              <Text style={styles.letterMini}>{item.name_lesson}</Text>
+            </TouchableOpacity>
+          );
+        }}
+      />
 
       <View style={styles.resultContainer}>
-        <View style={styles.resultBox}>
-          <Text style={styles.correctNumber}>{correct}</Text>
-          <Text style={styles.correctLabel}>Correct</Text>
-        </View>
-
-        <View style={styles.resultBox}>
-          <Text style={styles.wrongNumber}>{wrong}</Text>
-          <Text style={styles.wrongLabel}>Faux</Text>
-        </View>
+        <Text style={{ color: "green" }}>✔ {correct}</Text>
+        <Text style={{ color: "red" }}>✖ {wrong}</Text>
       </View>
 
-      <Text style={styles.message}>Bravo, continue !</Text>
-      <Text style={styles.trophy}>🏆</Text>
+      <TouchableOpacity style={styles.retryButton} onPress={handleRetry}>
+        <Text style={styles.retryText}>ESSAYER À NOUVEAU</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.retryButton, !isFinished && styles.disabledButton]}
+        onPress={handleSaveExercise}
+        disabled={!isFinished}
+      >
+        <Text style={styles.retryText}>ENREGISTRER EXERCICE</Text>
+      </TouchableOpacity>
     </View>
   );
 }
 
+/* ---------------- STYLES ---------------- */
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 60,
-    alignItems: "center",
-    backgroundColor: "#fff",
-    paddingHorizontal: 20,
-  },
-  loading: {
-    textAlign: "center",
-    marginTop: 50,
-    fontSize: 16,
-  },
-  error: {
-    color: "red",
-    textAlign: "center",
-    marginTop: 50,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 40,
-    color: "#000",
-  },
-  questionContainer: {
-    marginBottom: 30,
-  },
-  questionText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#000",
-    textAlign: "center",
-  },
-  targetLetter: {
-    fontWeight: "bold",
-    fontSize: 18,
-    color: "#000",
-  },
-  listContainer: {
-    width: "100%",
-    marginBottom: 40,
-  },
-  card: {
-    width: 190,
-    height: 190,
-    borderRadius: 15,
-    alignItems: "center",
+  container: { flex: 1, paddingTop: 50, alignItems: "center" },
+  title: { fontSize: 22, fontWeight: "bold" },
+  subtitle: { fontSize: 16, marginVertical: 15 },
+  finishText: { fontSize: 18, color: "green", fontWeight: "bold" },
+
+  letterItem: {
+    width: 360,
+    height: 260,
+    borderRadius: 25,
     justifyContent: "center",
-    marginLeft: 19,
-    elevation: 3,
+    alignItems: "center",
+    backgroundColor: "#d0caca",
+    marginBottom: 15,
   },
-  cardText: {
-    fontSize: 40,
-    fontWeight: "900",
-    color: "#000",
-  },
-  resultTitle: {
-    fontSize: 14,
-    fontWeight: "600",
-    marginBottom: 20,
-    color: "#000",
-  },
+  activeLetterItem: { backgroundColor: "#FFD700", marginLeft: 20 },
+  correctItem: { backgroundColor: "green" },
+  wrongItem: { backgroundColor: "red" },
+
+  letterMini: { fontSize: 60, fontWeight: "bold" },
+
   resultContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    width: "60%",
-    marginBottom: 30,
+    gap: 20,
+    marginTop: 10,
   },
-  resultBox: {
-    alignItems: "center",
+
+  retryButton: {
+    backgroundColor: "#1e90ff",
+    padding: 12,
+    borderRadius: 10,
+    marginTop: 10,
   },
-  correctNumber: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#00B32C",
-  },
-  correctLabel: {
-    fontSize: 14,
-    color: "#00B32C",
-    fontWeight: "600",
-  },
-  wrongNumber: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#FF3333",
-  },
-  wrongLabel: {
-    fontSize: 14,
-    color: "#FF3333",
-    fontWeight: "600",
-  },
-  message: {
-    fontSize: 18,
-    color: "#00B32C",
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-  trophy: {
-    fontSize: 50,
-  },
+  disabledButton: { backgroundColor: "#999" },
+  retryText: { color: "#fff", fontWeight: "bold" },
 });

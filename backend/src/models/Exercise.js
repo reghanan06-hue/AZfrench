@@ -2,8 +2,6 @@ import { DataTypes } from "sequelize";
 import sequelize from "../config/database.js";
 import Lecon from "./Lesson.js";
 
-// const Lecon = require('./Lecon');
-
 const Exercice = sequelize.define(
   "Exercice",
   {
@@ -12,6 +10,7 @@ const Exercice = sequelize.define(
       primaryKey: true,
       autoIncrement: true,
     },
+
     lecon_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -21,26 +20,29 @@ const Exercice = sequelize.define(
       },
       onDelete: "CASCADE",
     },
-    date_exercice: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
+
     niveau: {
       type: DataTypes.ENUM("niveau1", "niveau2", "niveau3"),
       allowNull: false,
     },
+
     type: {
-      type: DataTypes.ENUM("lecture", "ecriture", "écoute"),
+      type: DataTypes.ENUM("lecture", "écriture"),
       allowNull: false,
     },
   },
   {
     tableName: "exercices",
+    timestamps: true, // optionnel mais recommandé
   }
 );
 
-// Relation : Une Leçon peut avoir plusieurs Exercices
-Lecon.hasMany(Exercice, { foreignKey: "id_lesson" });
-Exercice.belongsTo(Lecon, { foreignKey: "id_lesson" });
+/* ================= RELATIONS ================= */
+
+// ✅ Une leçon → plusieurs exercices
+Lecon.hasMany(Exercice, { foreignKey: "lecon_id" });
+
+// ✅ Un exercice → une leçon
+Exercice.belongsTo(Lecon, { foreignKey: "lecon_id" });
 
 export default Exercice;

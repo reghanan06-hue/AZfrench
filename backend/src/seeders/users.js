@@ -10,47 +10,48 @@ async function seedUsers() {
     await sequelize.sync(); 
 
     const users = [
+      // {
+      //   nameUser: "Admin",
+      //   email: "admin@test.com",
+      //   password: await bcrypt.hash("123456", 10),
+      //   Genre: "boy"
+      // },
+      // {
+      //   nameUser: "Sara",
+      //   email: "sara@test.com",
+      //   password: await bcrypt.hash("123456", 10),
+      //   Genre: "girl"
+      // },
+      // {
+      //   nameUser: "Youssef",
+      //   email: "youssef@test.com",
+      //   password: await bcrypt.hash("123456", 10),
+      //   Genre: "boy"
+      // },
+      // {
+      //   nameUser: "Aya",
+      //   email: "aya@test.com",
+      //   password: await bcrypt.hash("123456", 10),
+      //   Genre: "girl"
+      // },
+      // {
+      //   nameUser: "Omar",
+      //   email: "omar@test.com",
+      //   password: await bcrypt.hash("123456", 10),
+      //   Genre: "boy"
+      // },
+      // {
+      //   nameUser: "Lina",
+      //   email: "lina@test.com",
+      //   password: await bcrypt.hash("123456", 10),
+      //   Genre: "girl"
+      // },
       {
-        nameUser: "Admin",
-        email: "admin@test.com",
+        nameUser: "Admin1",
+        email: "admin1@test.com",
         password: await bcrypt.hash("123456", 10),
-        Genre: "boy"
-      },
-      {
-        nameUser: "Sara",
-        email: "sara@test.com",
-        password: await bcrypt.hash("123456", 10),
-        Genre: "girl"
-      },
-      {
-        nameUser: "Youssef",
-        email: "youssef@test.com",
-        password: await bcrypt.hash("123456", 10),
-        Genre: "boy"
-      },
-      {
-        nameUser: "Aya",
-        email: "aya@test.com",
-        password: await bcrypt.hash("123456", 10),
-        Genre: "girl"
-      },
-      {
-        nameUser: "Omar",
-        email: "omar@test.com",
-        password: await bcrypt.hash("123456", 10),
-        Genre: "boy"
-      },
-      {
-        nameUser: "Lina",
-        email: "lina@test.com",
-        password: await bcrypt.hash("123456", 10),
-        Genre: "girl"
-      },
-      {
-        nameUser: "Adam",
-        email: "adam@test.com",
-        password: await bcrypt.hash("123456", 10),
-        Genre: "boy"
+        Genre: "admin",
+        role:"admin"
       }
     ];
 
