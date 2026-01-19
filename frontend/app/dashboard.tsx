@@ -25,7 +25,7 @@ export default function DashboardCoursScreen() {
   const router = useRouter();
   const [role, setRole] = useState<string>("");
 
-  // ✅ Récupération du rôle
+  //  Récupération du rôle
   useEffect(() => {
     const getRole = async () => {
       const storedRole = await AsyncStorage.getItem("role");
@@ -34,7 +34,6 @@ export default function DashboardCoursScreen() {
     getRole();
   }, []);
 
-  // ✅ Hook React Query pour récupérer les cours
   const { data: courses, isLoading, isError } = useGetAllCours();
 
   if (isLoading) {
@@ -64,21 +63,25 @@ export default function DashboardCoursScreen() {
         <Text style={styles.date}>{item.dateCours}</Text>
       </View>
       {role === "admin" && (
-        <TouchableOpacity
-          style={styles.editButton}
-          onPress={() => Alert.alert("Modifier", "Fonction modifier ici")}
-        >
-          <Text style={styles.buttonText}>Modifier</Text>
-        </TouchableOpacity>
+        <>
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={() => Alert.alert("Modifier", "Fonction modifier ici")}
+          >
+            <Text style={styles.buttonText}>Modifier</Text>
+          </TouchableOpacity>
+        </>
       )}
     </View>
   );
 
   return (
     <View style={styles.container}>
+      <Text style={styles.TitleCours}>Liste cours</Text>
       <FlatList
         data={courses}
         keyExtractor={(item) => item.id.toString()}
+        // numColumns={2}
         renderItem={renderItem}
         ListEmptyComponent={<Text>Aucun cours trouvé</Text>}
       />
@@ -88,7 +91,7 @@ export default function DashboardCoursScreen() {
           style={styles.addButton}
           onPress={() => router.push("/AddCourseScreen")}
         >
-          <Text style={styles.addButtonText}>Ajouter un cours</Text>
+          <Text style={styles.addButtonText}>Retour</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -96,8 +99,10 @@ export default function DashboardCoursScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#fff" },
+  container: { flex: 1, padding: 16, marginTop: 30, backgroundColor: "#fff" },
+
   loader: { flex: 1, justifyContent: "center", alignItems: "center" },
+  TitleCours: { fontSize: 20, fontFamily: "bold", alignSelf: "center" },
   card: {
     flexDirection: "row",
     backgroundColor: "#51abfa",

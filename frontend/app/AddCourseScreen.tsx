@@ -131,6 +131,28 @@ export default function AddCourseScreen() {
           <Text style={styles.buttonText}>Ajouter cours</Text>
         )}
       </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleAddCourse}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>Modifier cours</Text>
+        )}
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleAddCourse}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="#ed5b5b" />
+        ) : (
+          <Text style={styles.buttonText}>Supprimer cours</Text>
+        )}
+      </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.secondaryButton}

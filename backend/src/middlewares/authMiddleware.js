@@ -1,32 +1,7 @@
-// import jwt from "jsonwebtoken";
-
-// const auth = (req,res,next) => {
-//     const token = req.headers["autorization"];
-
-//     if(!token){
-//         return res.status(401).json({message : " Token manquant or Unauthorized"});
-
-//     }
-//     try{
-//         const decoded = jwt.verify(token.split(" ")[1],process.env.JWT_SECRET);
-//         console.log(decoded)
-//         req.user = decoded ;
-//         next();
-//     }catch(error){
-//         console.error("Erreurtoken :",error);
-//         res.status(401).json({message : "Token invalide"});
-//     }
-// };
-
-
-
-
-// export default auth;
-
 import jwt from "jsonwebtoken";
 
 const auth = (req, res, next) => {
-  const authHeader = req.headers.authorization; // ✅ CORRECT
+  const authHeader = req.headers.authorization; 
 
   if (!authHeader) {
     return res.status(401).json({
@@ -40,7 +15,7 @@ const auth = (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    req.user = decoded; // { id, nameUser, role, iat, exp }
+    req.user = decoded; // { id, nameUser, role }
     next();
   } catch (error) {
     console.error("Erreur token :", error);

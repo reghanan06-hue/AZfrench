@@ -52,3 +52,51 @@ export const getCoursById = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+// update cours
+export const updateCours =async(req,res) =>{
+
+  try{
+    const {id} =req.params;
+    // SELECT id, user_id, title, description, date_creation, "createdAt", "updatedAt", photo_url
+
+    const {title,description,photo_url} =req.body;
+     const cours = await Cours.findByPk(id);
+    if (!task) {
+      return res.status(404).json({ error: "Tâche non trouvée" });
+    }
+
+    // Mettre à jour les champs
+    cours.title = title || cours.title;
+    cours.description = description || cours.description;
+    cours.photo_url = photo_url || cours.photo_url;
+
+    await cours.save();
+
+    return res.status(200).json({ message: "Cours mise à jour avec succès", task });
+  } catch (error) {
+    console.error("Erreur updateCours:", error);
+    return res.status(500).json({ error: "Erreur serveur" });
+  }
+  
+}
+// delete
+export const deleteCours = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Vérifier si la tâche existe
+    const cours = await Cours.findByPk(id);
+    if (!cours) {
+      return res.status(404).json({ error: "Cours non trouvée" });
+    }
+
+    // Supprimer cours
+    await cours.destroy();
+
+    return res.status(200).json({ message: "Cours supprimée avec succès" });
+  } catch (error) {
+    console.error("Erreur deleteCours:", error);
+    return res.status(500).json({ error: "Erreur serveur" });
+  }
+};
