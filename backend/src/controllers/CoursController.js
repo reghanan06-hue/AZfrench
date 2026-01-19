@@ -62,8 +62,8 @@ export const updateCours =async(req,res) =>{
 
     const {title,description,photo_url} =req.body;
      const cours = await Cours.findByPk(id);
-    if (!task) {
-      return res.status(404).json({ error: "Tâche non trouvée" });
+    if (!cours) {
+      return res.status(404).json({ error: "Cours non trouvé" });
     }
 
     // Mettre à jour les champs
@@ -73,7 +73,7 @@ export const updateCours =async(req,res) =>{
 
     await cours.save();
 
-    return res.status(200).json({ message: "Cours mise à jour avec succès", task });
+    return res.status(200).json({ message: "Cours mis à jour avec succès", cours });
   } catch (error) {
     console.error("Erreur updateCours:", error);
     return res.status(500).json({ error: "Erreur serveur" });

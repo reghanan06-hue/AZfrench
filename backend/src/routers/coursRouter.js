@@ -2,7 +2,9 @@ import express from "express";
 import {
     createCourse,
     getAllCours,
-    getCoursById
+    getCoursById,
+    updateCours,
+    deleteCours
 } from "../controllers/CoursController.js";
 
 // import auth from "../middlewares/authMiddleware.js";     
@@ -130,5 +132,73 @@ router.get("/:id", getCoursById);
  *       403:
  *         description: Accès refusé (non admin)
  */
-router.post("/",authMiddleware,isAdmin, createCourse);
+router.post("/", authMiddleware, isAdmin, createCourse);
+
+/**
+ * @swagger
+ * /cours/{id}:
+ *   put:
+ *     summary: Mettre à jour un cours (admin seulement)
+ *     tags: [Cours]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID du cours
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               photo_url:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Cours mis à jour avec succès
+ *       404:
+ *         description: Cours non trouvé
+ *       401:
+ *         description: Non authentifié
+ *       403:
+ *         description: Accès refusé (non admin)
+ */
+router.put("/:id", authMiddleware, isAdmin, updateCours);
+
+/**
+ * @swagger
+ * /cours/{id}:
+ *   delete:
+ *     summary: Supprimer un cours (admin seulement)
+ *     tags: [Cours]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID du cours
+ *     responses:
+ *       200:
+ *         description: Cours supprimé avec succès
+ *       404:
+ *         description: Cours non trouvé
+ *       401:
+ *         description: Non authentifié
+ *       403:
+ *         description: Accès refusé (non admin)
+ */
+router.delete("/:id", authMiddleware, isAdmin, deleteCours);
+
 export default router;
