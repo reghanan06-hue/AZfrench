@@ -70,6 +70,12 @@ export default function DashboardCoursScreen() {
           >
             <Text style={styles.buttonText}>Modifier</Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={() => Alert.alert("Modifier", "Fonction modifier ici")}
+          >
+            <Text style={styles.buttonText}></Text>
+          </TouchableOpacity>
         </>
       )}
     </View>

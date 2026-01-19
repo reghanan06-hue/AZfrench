@@ -109,11 +109,12 @@ export default function MainTabLayout() {
             // Use href to ensure id is passed when navigating to this tab
             href: `/${id}/exerciseReading`,
             tabBarIcon: ({ color, size }) => (
-              <FontAwesome5 name="book" size={size} color={color} />
+              // <FontAwesome5 name="book" size={size} color={color} />
+              <FontAwesome5 name="headphones" size={size} color={color} />
             ),
             tabBarLabel: "Lecture",
             tabBarActiveTintColor: "#478ef9ff",
-            tabBarInactiveTintColor: "#a6e2edff",
+            tabBarInactiveTintColor: "rgb(21, 22, 22)",
             headerShown: false,
             tabBarStyle: {
               backgroundColor: "#f0f0f0",

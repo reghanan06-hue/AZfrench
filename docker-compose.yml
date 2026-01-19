@@ -1,0 +1,45 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: az_postgres
+    ports:
+      - "54323:5432" # ⛔ exposed DB
+    environment:
+      POSTGRES_DB: AZdata
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - az_net
+
+  api:
+    build: ./backend
+    container_name: azfrench_api
+    ports:
+      - "80:3000"
+    depends_on:
+      - postgres
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+
+      DB_HOST: postgres # internal Docker communication
+      DB_PORT: 54321
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: AZdata
+
+      JWT_SECRET: votre_super_secret_jwt_az_2024
+      JWT_EXPIRE: 7d
+    networks:
+      - az_net
+
+volumes:
+  pgdata:
+
+networks:
+  az_net:
+    driver: bridge
