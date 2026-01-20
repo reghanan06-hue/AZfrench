@@ -56,7 +56,7 @@ export const register = async (req, res) => {
   }
 };
 
-/* ===================== LOGIN ===================== */
+/* ==============///////======= LOGIN =====///================ */
 export const login = async (req, res) => {
   try {
     // validation avec Joi

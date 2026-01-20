@@ -52,6 +52,7 @@ Join our community of developers creating universal apps.
 Application Mobile AZ French
 
 Réalisée par : Hanan Ragban
+
 Sommaire
 
 1. Mise en situation

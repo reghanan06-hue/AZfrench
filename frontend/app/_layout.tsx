@@ -20,6 +20,7 @@ export default function _layout() {
           }}
         /> */}
         <Stack.Screen name="AddCourseScreen" />
+
         <Stack.Screen name="dashboaed" />
       </Stack>
     </QueryClientProvider>

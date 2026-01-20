@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/database.js";
-import Lecon from "./Lesson.js";
+import Cours from "./Cours.js";
 
 const Exercice = sequelize.define(
   "Exercice",
@@ -11,11 +11,11 @@ const Exercice = sequelize.define(
       autoIncrement: true,
     },
 
-    lecon_id: {
+    cours_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: Lecon,
+        model: Cours,
         key: "id",
       },
       onDelete: "CASCADE",
@@ -33,16 +33,13 @@ const Exercice = sequelize.define(
   },
   {
     tableName: "exercices",
-    timestamps: true, // optionnel mais recommandé
+    timestamps: true, 
   }
 );
 
-/* ================= RELATIONS ================= */
 
-// ✅ Une leçon → plusieurs exercices
-Lecon.hasMany(Exercice, { foreignKey: "lecon_id" });
+Cours.hasMany(Exercice, { foreignKey: "cours_id" });
 
-// ✅ Un exercice → une leçon
-Exercice.belongsTo(Lecon, { foreignKey: "lecon_id" });
+Exercice.belongsTo(Cours, { foreignKey: "cours_id" });
 
 export default Exercice;

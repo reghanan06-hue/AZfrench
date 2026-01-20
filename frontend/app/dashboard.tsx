@@ -1,139 +1,179 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   View,
   Text,
-  FlatList,
   StyleSheet,
-  ActivityIndicator,
+  FlatList,
   TouchableOpacity,
-  Image,
+  ActivityIndicator,
   Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { FontAwesome } from "@expo/vector-icons";
 import { useGetAllCours } from "../service/course/queries";
+import { instance } from "../service/instance";
 
-type Cours = {
-  id: string;
-  title: string;
-  description: string;
-  iconUrl?: string;
-  dateCours: string;
-};
-
-export default function DashboardCoursScreen() {
+export default function CourseListScreen() {
   const router = useRouter();
-  const [role, setRole] = useState<string>("");
+  const {
+    data: courses,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useGetAllCours();
 
-  //  Récupération du rôle
-  useEffect(() => {
-    const getRole = async () => {
-      const storedRole = await AsyncStorage.getItem("role");
-      setRole(storedRole || "");
-    };
-    getRole();
-  }, []);
+  const handleDelete = async (id: number) => {
+    Alert.alert("Confirmer", "Voulez-vous vraiment supprimer ce cours ?", [
+      { text: "Annuler", style: "cancel" },
+      {
+        text: "Supprimer",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            const token = await AsyncStorage.getItem("token");
+            if (!token)
+              return Alert.alert("Erreur", "Utilisateur non authentifié");
 
-  const { data: courses, isLoading, isError } = useGetAllCours();
+            await instance.delete(`/cours/${id}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+
+            Alert.alert("Succès", "Cours supprimé avec succès");
+            refetch(); // recharge la liste
+          } catch (error: any) {
+            Alert.alert(
+              "Erreur",
+              error.response?.data?.message ||
+                "Impossible de supprimer le cours",
+            );
+          }
+        },
+      },
+    ]);
+  };
+
+  const handleUpdate = (id: number) => {
+    router.push(`/AddCourseScreen?id=${id}`);
+  };
+
+  const renderItem = ({ item }: any) => (
+    <View style={styles.card}>
+      <View style={{ flex: 1 }}>
+        <Text style={styles.title}>{item.title}</Text>
+        <Text style={styles.description}>{item.descreption}</Text>
+        <Text style={styles.date}>Créé le : {item.date_creation}</Text>
+      </View>
+
+      <View style={styles.actionContainer}>
+        <TouchableOpacity
+          onPress={() => handleUpdate(item.id)}
+          style={styles.iconButton}
+        >
+          <FontAwesome name="edit" size={24} color="blue" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => handleDelete(item.id)}
+          style={styles.iconButton}
+        >
+          <FontAwesome name="trash" size={24} color="red" />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 
   if (isLoading) {
     return (
       <View style={styles.loader}>
-        <ActivityIndicator size="large" color="#6EC6F3" />
+        <ActivityIndicator size="large" color="#1A73E8" />
       </View>
     );
   }
 
-  if (isError || !courses) {
+  if (isError) {
     return (
       <View style={styles.loader}>
-        <Text>Erreur lors du chargement des cours</Text>
+        <Text style={{ color: "red" }}>
+          {(error as Error)?.message || "Erreur lors du chargement"}
+        </Text>
       </View>
     );
   }
 
-  const renderItem = ({ item }: { item: Cours }) => (
-    <View style={styles.card}>
-      {item.iconUrl && (
-        <Image source={{ uri: item.iconUrl }} style={styles.icon} />
-      )}
-      <View style={{ flex: 1 }}>
-        <Text style={styles.title}>{item.title}</Text>
-        <Text style={styles.description}>{item.description}</Text>
-        <Text style={styles.date}>{item.dateCours}</Text>
-      </View>
-      {role === "admin" && (
-        <>
-          <TouchableOpacity
-            style={styles.editButton}
-            onPress={() => Alert.alert("Modifier", "Fonction modifier ici")}
-          >
-            <Text style={styles.buttonText}>Modifier</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.editButton}
-            onPress={() => Alert.alert("Modifier", "Fonction modifier ici")}
-          >
-            <Text style={styles.buttonText}></Text>
-          </TouchableOpacity>
-        </>
-      )}
-    </View>
-  );
-
   return (
-    <View style={styles.container}>
-      <Text style={styles.TitleCours}>Liste cours</Text>
+    <>
+      <Text style={styles.TitleDashboard}>Tableau de bord</Text>
+
       <FlatList
         data={courses}
-        keyExtractor={(item) => item.id.toString()}
-        // numColumns={2}
+        keyExtractor={(item: any) => item.id.toString()}
         renderItem={renderItem}
-        ListEmptyComponent={<Text>Aucun cours trouvé</Text>}
+        contentContainerStyle={styles.container}
+        ListEmptyComponent={
+          <Text style={styles.emptyText}>Aucun cours disponible.</Text>
+        }
       />
-
-      {role === "admin" && (
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => router.push("/AddCourseScreen")}
-        >
-          <Text style={styles.addButtonText}>Retour</Text>
-        </TouchableOpacity>
-      )}
-    </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, marginTop: 30, backgroundColor: "#fff" },
-
-  loader: { flex: 1, justifyContent: "center", alignItems: "center" },
-  TitleCours: { fontSize: 20, fontFamily: "bold", alignSelf: "center" },
-  card: {
-    flexDirection: "row",
-    backgroundColor: "#51abfa",
-    padding: 12,
-    borderRadius: 10,
-    marginBottom: 12,
+  container: {
+    padding: 20,
+    backgroundColor: "#f2f6fc",
+  },
+  TitleDashboard: {
+    alignSelf: "center",
+    fontSize: 30,
+    marginTop: 50,
+    fontFamily: "bold",
+  },
+  loader: {
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
   },
-  icon: { width: 60, height: 60, marginRight: 12, borderRadius: 8 },
-  title: { fontSize: 18, fontWeight: "bold" },
-  description: { fontSize: 14, color: "#fff" },
-  date: { fontSize: 12, color: "#eee" },
-  editButton: {
-    backgroundColor: "#76C9F0",
-    padding: 8,
-    borderRadius: 8,
-    marginLeft: 8,
-  },
-  buttonText: { color: "#fff", fontWeight: "bold" },
-  addButton: {
-    backgroundColor: "#6EC6F3",
+  card: {
+    backgroundColor: "#cd73f8",
     padding: 15,
     borderRadius: 12,
+    marginBottom: 15,
+    flexDirection: "row",
     alignItems: "center",
-    marginTop: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
-  addButtonText: { color: "#000", fontWeight: "bold", fontSize: 16 },
+  title: {
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 5,
+  },
+  description: {
+    fontSize: 14,
+    color: "#ffffff",
+    marginBottom: 5,
+  },
+  date: {
+    fontSize: 12,
+    color: "#ffffff",
+    marginBottom: 5,
+  },
+  actionContainer: {
+    flexDirection: "row",
+    marginLeft: 10,
+  },
+  iconButton: {
+    marginLeft: 10,
+  },
+  emptyText: {
+    textAlign: "center",
+    marginTop: 50,
+    color: "#555",
+    fontSize: 16,
+  },
 });
