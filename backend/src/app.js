@@ -6,8 +6,6 @@ import authRouters from "./routers/authRouter.js";
 import  CoursRouters from "./routers/coursRouter.js";
 import LessonRouters from "./routers/LessonRouter.js";
 import ExerciseRouter  from "./routers/exerciseRouter.js";
-import { swaggerSpec } from "./config/swagger.js";
-import swaggerUi from "swagger-ui-express";
 
 
 const app = express();
@@ -24,15 +22,35 @@ app.use("/cours/:id", CoursRouters);
 
 app.use("/lesson",LessonRouters);
 app.use("/exercise",ExerciseRouter);
-// swagger
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+// swagger (skip in unit tests to avoid loading swagger config / import.meta)
+async function setupSwagger() {
+  const [{ swaggerSpec }, swaggerUi] = await Promise.all([
+    import("./config/swagger.js"),
+    import("swagger-ui-express"),
+  ]);
+
+  app.use(
+    "/api-docs",
+    swaggerUi.default.serve,
+    swaggerUi.default.setup(swaggerSpec)
+  );
+}
+
+if (process.env.NODE_ENV !== "test") {
+  // fire-and-forget; if swagger fails we still want the API to boot
+  setupSwagger().catch(() => {});
+}
 
 const PORT = process.env.PORT || 4000;
 
+export default app;
 
- 
-connectDB().then(() => {
+// When running unit tests, we want to import the Express app without
+// auto-connecting to the DB or starting a real HTTP listener.
+if (process.env.NODE_ENV !== "test") {
+  connectDB().then(() => {
     app.listen(PORT, () => {
-        console.log(` Server running on port ${PORT}`);
+      console.log(` Server running on port ${PORT}`);
     });
-});
+  });
+}
