@@ -14,8 +14,17 @@ const options = {
       version: "1.0.0",
       description: "API documentation for AZ french backend",
     },
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
   },
   apis: [path.join(__dirname, "../routers/*.js")],
 };
 
-export const swaggerSpec = swaggerJsDoc(options); 
+export const swaggerSpec = swaggerJsDoc(options);

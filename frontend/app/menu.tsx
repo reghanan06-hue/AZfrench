@@ -90,19 +90,24 @@ export default function Menu() {
 
       {/* COLOR MENU */}
       {showColor && (
-        <View style={styles.colorMenu}>
-          {colors.map((color, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[styles.colorBox, { backgroundColor: color }]}
-              onPress={() => {
-                setSelectedColorIndex(index);
-                setSelectedBtnColorIndex(index);
-                setShowColor(false);
-              }}
-            />
-          ))}
-        </View>
+      <View style={styles.colorMenu}>
+  {colors.map((color, index) => (
+    <TouchableOpacity
+      key={index}
+      style={[
+        styles.colorBox,
+        { backgroundColor: color },
+        selectedBtnColorIndex === index && styles.selectedBorder, // bordure si sélectionné
+      ]}
+      onPress={() => {
+        setSelectedColorIndex(index);
+        setSelectedBtnColorIndex(index);
+        setShowColor(false);
+      }}
+    />
+  ))}
+</View>
+
       )}
 
       {/* LISTE 2 COLONNES */}
@@ -153,6 +158,8 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     justifyContent: "center",
     marginVertical: 15,
+  
+
   },
 
   colorBox: {
@@ -161,7 +168,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     margin: 5,
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#0c0b0b",
+  
   },
 
   cardBttn: {
@@ -185,5 +193,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     textAlign: "center",
+  },
+   selectedBorder: {
+    borderWidth: 3,
+    borderColor: "blue", // bordure bleue
   },
 });

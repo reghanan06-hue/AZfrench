@@ -11,17 +11,12 @@ export default function _layout() {
         <Stack.Screen name="login" />
         <Stack.Screen name="account" />
         <Stack.Screen name="menu" />
-        {/* 
-        <Stack.Screen
-          name="[id]"
-          options={{
-            title: "Lesson Details",
-            headerShown: false,
-          }}
-        /> */}
         <Stack.Screen name="AddCourseScreen" />
 
-        <Stack.Screen name="dashboaed" />
+        <Stack.Screen
+          name="dashboard"
+        
+        />
       </Stack>
     </QueryClientProvider>
   );

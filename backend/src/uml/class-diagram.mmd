@@ -1,0 +1,64 @@
+classDiagram
+direction TB
+
+class users {
+  -int id
+  -string nameUser
+  -string email
+  -string password
+  +enum Genre  // fille|garçon|admin
+  +enum role   // admin|user
+  +timestamp created_at
+  +timestamp updated_at
+  --
+  +register()
+  +login()
+}
+
+class cours {
+  -int id
+  +int user_id
+  +string title
+  +text description
+  +string photo_url
+  +date date_creation
+  +timestamp createdAt
+  +timestamp updatedAt
+  --
+  -createCourse()
+  +getAllCours()
+  +getCoursById()
+  -updateCours()
+  -deleteCours()
+}
+
+class lecon {
+  int id
+  -int cours_id
+  +string name_lesson
+  +date date_lecon
+  +string photo_url
+  --
+  +createLesson()
+  +getAllLesson()
+  +getLessonById()
+}
+
+class exercices {
+  -int id
+  +int cours_id
+  +enum niveau  // niveau1|niveau2|niveau3
+  +enum type    // lecture|écriture
+  +timestamp createdAt
+  +timestamp updatedAt
+  --
+  +createExercise()
+  +getAllExercises()
+  +getExeciseById()
+}
+
+%% Relationships inferred from model FKs (onDelete: CASCADE => composition)
+users "1" *-- "0..*" cours : owns
+cours  "1" *-- "0..*" lecon : contains
+cours  "1" *-- "0..*" exercices : includes
+

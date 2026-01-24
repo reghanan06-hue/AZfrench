@@ -1,4 +1,5 @@
-import React from "react";
+
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -6,6 +7,7 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
+  BackHandler,
   Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
@@ -24,6 +26,21 @@ export default function CourseListScreen() {
     refetch,
   } = useGetAllCours();
 
+  // 🔹 Gestion du bouton retour Android
+  useEffect(() => {
+    const backAction = () => {
+      router.push("/AddCourseScreen"); // redirige vers AddCourseScreen
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction,
+    );
+
+    return () => backHandler.remove();
+  }, []);
+
   const handleDelete = async (id: number) => {
     Alert.alert("Confirmer", "Voulez-vous vraiment supprimer ce cours ?", [
       { text: "Annuler", style: "cancel" },
@@ -41,7 +58,7 @@ export default function CourseListScreen() {
             });
 
             Alert.alert("Succès", "Cours supprimé avec succès");
-            refetch(); // recharge la liste
+            refetch();
           } catch (error: any) {
             Alert.alert(
               "Erreur",
@@ -103,9 +120,8 @@ export default function CourseListScreen() {
   }
 
   return (
-    <>
+    <View style={{ flex: 1 }}>
       <Text style={styles.TitleDashboard}>Tableau de bord</Text>
-
       <FlatList
         data={courses}
         keyExtractor={(item: any) => item.id.toString()}
@@ -115,7 +131,15 @@ export default function CourseListScreen() {
           <Text style={styles.emptyText}>Aucun cours disponible.</Text>
         }
       />
-    </>
+
+      {/* Bouton flottant pour ajouter un cours */}
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => router.push("/AddCourseScreen")}
+      >
+        <FontAwesome name="plus" size={24} color="#fff" />
+      </TouchableOpacity>
+    </View>
   );
 }
 
@@ -123,20 +147,23 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     backgroundColor: "#f2f6fc",
-  },
-  TitleDashboard: {
-    alignSelf: "center",
-    fontSize: 30,
-    marginTop: 50,
-    fontFamily: "bold",
+    paddingBottom: 100, // pour que le FlatList ne soit pas caché par le bouton
   },
   loader: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
+  TitleDashboard: {
+    color: "blue",
+    alignSelf: "center",
+    fontSize: 30,
+    marginTop: 60,
+    fontFamily: "bold",
+    marginBottom: 5,
+  },
   card: {
-    backgroundColor: "#cd73f8",
+    backgroundColor: "#73b1f8",
     padding: 15,
     borderRadius: 12,
     marginBottom: 15,
@@ -148,32 +175,33 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
-  title: {
-    fontSize: 18,
-    fontWeight: "700",
-    marginBottom: 5,
-  },
-  description: {
-    fontSize: 14,
-    color: "#ffffff",
-    marginBottom: 5,
-  },
-  date: {
-    fontSize: 12,
-    color: "#ffffff",
-    marginBottom: 5,
-  },
-  actionContainer: {
-    flexDirection: "row",
-    marginLeft: 10,
-  },
-  iconButton: {
-    marginLeft: 10,
-  },
+  title: { fontSize: 18, fontWeight: "700", marginBottom: 5 },
+  description: { fontSize: 14, color: "#ffffff", marginBottom: 5 },
+  date: { fontSize: 12, color: "#ffffff", marginBottom: 5 },
+  actionContainer: { flexDirection: "row", marginLeft: 10 },
+  iconButton: { marginLeft: 10 },
   emptyText: {
     textAlign: "center",
     marginTop: 50,
     color: "#555",
     fontSize: 16,
+  },
+
+  // 🔹 Style du bouton flottant
+  addButton: {
+    position: "absolute",
+    bottom: 30,
+    right: 30,
+    backgroundColor: "#1dc18d",
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
   },
 });

@@ -96,9 +96,10 @@ export default function ExerciseLectureScreen() {
       const niveau = getExerciseLevel();
 
       await instance.post("/exercise", {
-        lecon_id: coursId,
+        cours_id: coursId,
         niveau,
         type: "écriture",
+               
       });
 
       Alert.alert("Succès", `Exercice enregistré avec succès (${niveau}) ✅`);
@@ -121,7 +122,7 @@ export default function ExerciseLectureScreen() {
       {!isFinished ? (
         <Text style={styles.subtitle}>Écris : {currentLesson.name_lesson}</Text>
       ) : (
-        <Text style={styles.finishText}>🎉 Exercice terminé !</Text>
+        <Text style={styles.finishText}>Exercice terminé !</Text>
       )}
 
       <FlatList
@@ -213,7 +214,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 22,
-    fontWeight: "bold",
+    fontWeight: "bold",marginTop:20,
   },
   subtitle: {
     fontSize: 16,

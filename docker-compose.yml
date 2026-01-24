@@ -1,38 +1,46 @@
-version: "3.8"
+version: "3.8"  # version doker compose
 
-services:
-  postgres:
-    image: postgres:15
-    container_name: az_postgres
+services:  #  un ontientt plusieurs servie pour lane plusieurs onteneur mm temps
+  postgres: # nom servie
+    image: postgres:15  #mage Docker utilisée Image officielle PostgreSQL version 15 si n exit pas teleharger
+
+
+    container_name: az_postgres # nom onteneur
     ports:
-      - "54323:5432" # ⛔ exposed DB
-    environment:
-      POSTGRES_DB: AZdata
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    networks:
-      - az_net
+      - "54323:5432" #  exposed DB 
+      # 5432 → port interne de PostgreSQL dans le conteneur
 
-  api:
-    build: ./backend
+    environment: #  place pour don les variable pour le onteneur conai 
+      POSTGRES_DB: AZdata  # nom BD
+      POSTGRES_USER: postgres # nom d utilisateur
+      POSTGRES_PASSWORD: postgres # pasword
+
+    volumes: # volumes = espace de stockage externe du conteneur.dans pc nomer pgdata
+      - pgdata:/var/lib/postgresql/data  #  chemin, à l'intérieur du conteneur, où PostgreSQL stocke les données.
+    networks: #  networks permet de connecter le conteneur à un réseau Docker.
+      - az_net # nom networks 
+       # communiation etre les conteneurs par nom sevie DNS => ip en network
+
+  api: # nom du service pour ton API backend.
+    build: ./backend   #Docker va construire l’image de ton API à partir du Dockerfile dans le dossier ./backend.
     container_name: azfrench_api
     ports:
-      - "80:3000"
-    depends_on:
-      - postgres
+      - "80:3000" # Mappe le port 3000 à l’intérieur du conteneur vers le port 80 sur ta machine.
+    depends_on:  # Cela signifie que le conteneur api dépend du conteneur postgres. #Docker Compose va démarrer d’abord postgres, puis api.
+
+      - postgres # run postgres et puis API
     environment:
-      NODE_ENV: development
-      PORT: 3000
+      NODE_ENV: development  #NODE_ENV: development → mode développement pour l’API
+      PORT: 3000   #port interne de l’API
 
       DB_HOST: postgres # internal Docker communication
-      DB_PORT: 54321
+      DB_PORT: 54321    #port pour accéder à Postgres depuis ton PC ? ( normalement pour l’API interne ça doit être 5432)
+      #DB_USER, DB_PASSWORD, DB_NAME → infos pour se connecter à la base
       DB_USER: postgres
       DB_PASSWORD: postgres
       DB_NAME: AZdata
 
-      JWT_SECRET: votre_super_secret_jwt_az_2024
+      JWT_SECRET: votre_super_secret_jwt_az_2024 #configuration pour le système d’authentification JWT
       JWT_EXPIRE: 7d
     networks:
       - az_net
@@ -42,4 +50,6 @@ volumes:
 
 networks:
   az_net:
-    driver: bridge
+    driver: bridge  #Crée le réseau az_net avec driver bridge
+    #driver: bridge = réseau interne Docker qui fait un pont entre les conteneurs 
+    #pourqu’ils puissent communiquer facilement et en sécurité.

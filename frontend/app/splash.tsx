@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   Animated,
   Dimensions,
@@ -15,7 +15,6 @@ export default function Account() {
   const router = useRouter();
   const { height } = Dimensions.get("window");
 
-  // Animations
   const slideAnim = useRef(new Animated.Value(-height / 2)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnimText = useRef(new Animated.Value(height / 2)).current;
@@ -63,12 +62,12 @@ export default function Account() {
           useNativeDriver: true,
         }),
         Animated.timing(scaleAnim, {
-          toValue: 1,
+          toValue: 0.8,
           duration: 600,
           easing: Easing.inOut(Easing.ease),
           useNativeDriver: true,
         }),
-      ])
+      ]),
     ).start();
   }, []);
 
@@ -103,7 +102,7 @@ export default function Account() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#eff3f5ff",
+    backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
   },

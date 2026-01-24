@@ -23,12 +23,13 @@ export default function AddCourseScreen() {
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [iconUrl, setIconUrl] = useState("");
+  const [photoUrl, setPhotoUrl] = useState("");
   const [dateCours, setDateCours] = useState("");
   const [loading, setLoading] = useState(false);
 
+  //Liste cours charger
   useEffect(() => {
-    if (!isEditMode) return;
+    if (!isEditMode || !coursId) return;
 
     const fetchCourse = async () => {
       try {
@@ -36,8 +37,7 @@ export default function AddCourseScreen() {
         const token = await AsyncStorage.getItem("token");
 
         if (!token) {
-          Alert.alert("Erreur", "Utilisateur non authentifié");
-          return;
+          return Alert.alert("Erreur", "Utilisateur non authentifié");
         }
 
         const res = await instance.get(`/cours/${coursId}`, {
@@ -46,10 +46,10 @@ export default function AddCourseScreen() {
 
         const course = res.data;
 
-        setTitle(course.title);
-        setDescription(course.descreption);
-        setDateCours(course.date_creation);
-        setIconUrl(course.iconUrl || "");
+        setTitle(course.title || "");
+        setDescription(course.description || "");
+        setDateCours(course.date_creation || "");
+        setPhotoUrl(course.photo_url || "");
       } catch (error) {
         Alert.alert("Erreur", "Impossible de charger le cours");
       } finally {
@@ -60,15 +60,9 @@ export default function AddCourseScreen() {
     fetchCourse();
   }, [coursId]);
 
-  /* =============================
-     AJOUT COURS
-  ============================== */
   const handleAddCourse = async () => {
     if (!title || !description || !dateCours) {
-      return Alert.alert(
-        "Erreur",
-        "Veuillez remplir tous les champs obligatoires",
-      );
+      return Alert.alert("Erreur", "Veuillez remplir tous les champs");
     }
 
     try {
@@ -76,15 +70,14 @@ export default function AddCourseScreen() {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        Alert.alert("Erreur", "Utilisateur non authentifié");
-        return;
+        return Alert.alert("Erreur", "Utilisateur non authentifié");
       }
 
       const body = {
         title,
-        descreption: description,
+        description,
         date_creation: dateCours,
-        iconUrl,
+        photo_url: photoUrl,
       };
 
       await instance.post("/cours", body, {
@@ -104,15 +97,13 @@ export default function AddCourseScreen() {
     }
   };
 
-  /* =============================
-     MODIFIER COURS
-  ============================== */
   const handleUpdateCourse = async () => {
+    if (!coursId) {
+      return Alert.alert("Erreur", "ID du cours invalide");
+    }
+
     if (!title || !description || !dateCours) {
-      return Alert.alert(
-        "Erreur",
-        "Veuillez remplir tous les champs obligatoires",
-      );
+      return Alert.alert("Erreur", "Veuillez remplir tous les champs");
     }
 
     try {
@@ -120,18 +111,17 @@ export default function AddCourseScreen() {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        Alert.alert("Erreur", "Utilisateur non authentifié");
-        return;
+        return Alert.alert("Erreur", "Utilisateur non authentifié");
       }
 
       const body = {
         title,
-        descreption: description,
+        description,
         date_creation: dateCours,
-        iconUrl,
+        photo_url: photoUrl,
       };
 
-      await instance.patch(`/cours/${coursId}`, body, {
+      await instance.put(`/cours/${coursId}`, body, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -139,6 +129,7 @@ export default function AddCourseScreen() {
         { text: "OK", onPress: () => router.replace("/dashboard") },
       ]);
     } catch (error: any) {
+      console.log("UPDATE ERROR:", error.response?.data);
       Alert.alert(
         "Erreur",
         error.response?.data?.message || "Impossible de modifier le cours",
@@ -183,13 +174,12 @@ export default function AddCourseScreen() {
       />
 
       <TextInput
-        placeholder="URL icône (optionnel)"
-        value={iconUrl}
-        onChangeText={setIconUrl}
+        placeholder="URL image (optionnel)"
+        value={photoUrl}
+        onChangeText={setPhotoUrl}
         style={styles.input}
       />
 
-      {/* 🔘 BOUTON DYNAMIQUE */}
       <TouchableOpacity
         style={styles.button}
         onPress={isEditMode ? handleUpdateCourse : handleAddCourse}
@@ -210,13 +200,16 @@ export default function AddCourseScreen() {
       >
         <Text style={styles.buttonText}>Tableau de bord</Text>
       </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.secondaryButton}
+        onPress={() => router.replace("/menu")}
+      >
+        <Text style={styles.buttonText}>Liste cours</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
 
-/* =============================
-     STYLES (inchangés)
-============================== */
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
@@ -267,6 +260,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     alignItems: "center",
+    marginBottom: 20,
   },
   buttonText: {
     color: "#fff",

@@ -1,26 +1,50 @@
 import Lesson from "../models/Lesson.js";
 import Exercise from "../models/Exercise.js";
 
+// export const createExercise = async (req, res) => {
+//   try {
+//     const { lecon_id, niveau, type } = req.body;
+
+//     if (!lecon_id  || !niveau || !type) {
+//       return res.status(400).json({ message: "Missing fields" });
+//     }
+
+//     const exercise = await Exercise.create({
+//       lecon_id,
+//       niveau,
+//       type,
+//     });
+
+//     res.status(201).json({
+//       message: "Exercise created successfully",
+//       exercise,
+//     });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
 export const createExercise = async (req, res) => {
   try {
-    const { lecon_id, niveau, type } = req.body;
+    const { cours_id, niveau, type } = req.body;
 
-    if (!lecon_id  || !niveau || !type) {
+    if (!cours_id || !niveau || !type) {
       return res.status(400).json({ message: "Missing fields" });
     }
 
     const exercise = await Exercise.create({
-      lecon_id,
+      cours_id,
       niveau,
       type,
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "Exercise created successfully",
       exercise,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error(error);
+    return res.status(500).json({ error: error.message });
   }
 };
 

@@ -5,7 +5,6 @@ import { useGetCoursById } from "@/service/course/queries";
 
 import AlphabetDesign from "../../components/designs/AlphabetDesign";
 import SecondCours from "../../components/designs/SecondCours";
-// import ExerciseReading from "../tab/exerciseReading";
 
 export default function CoursScreen() {
   const { id } = useLocalSearchParams();
@@ -32,7 +31,7 @@ export default function CoursScreen() {
       </Text>
     );
 
-  // ================= Dynamically render component =================
+ 
   const titleLower = data.title.toLowerCase();
   if (titleLower.includes("alphabet")) {
     return <AlphabetDesign data={data} coursId={coursId} />;
